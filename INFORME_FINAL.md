@@ -143,13 +143,13 @@ Antes de clase, con una cuenta de alumno o una ventana privada, abriendo los cua
 8. **Reproducción de vídeo:** que los vídeos de 2.5 y 2.6 se reproducen en Chrome y Safari.
 9. **Privacidad:** que `private_outputs` hace que Colab no guarde las salidas del NB2, y el nombre del menú «Editar → Borrar todos los resultados».
 10. **CNN Explainer:** repetir el recorrido del guion una vez en el navegador de clase.
-11. **Enlaces:** sustituir `<USUARIO>/<REPO>` en los badges o quitar el badge antes de subir al aula virtual.
+11. **Enlaces:** los badges apuntan a https://github.com/Lougedo/cnn_samples_colab; comprobar que abren en Colab.
 
 ## 6. Pendientes para el profesor
 
 - 🔴 Crear la hoja común de resultados y poner su enlace en el chat (cabecera: la primera línea que da la celda 1.8).
-- 🔴 Subir los cuadernos a GitHub o Drive y cambiar el enlace de los badges.
-- 🔴 Decidir la licencia del repositorio si se publica (D50: si se publica, AGPL-3.0 al menos para el NB2).
+- ✅ Publicado en GitHub (https://github.com/Lougedo/cnn_samples_colab) y copia de los cuadernos en Drive.
+- ✅ Licencia del repositorio: AGPL-3.0 (D50).
 - 🔴 Aceptar o no la desviación de los rótulos con n.º en el gráfico del registro (D23).
 - 🟡 Ejecutar el Plan B una vez en Colab antes de clase para tener la tabla de referencia a mano.
 - 🟡 Ajustar el bloque en la S7: `sesiones/S7/01-esqueleto.md` reserva 40 min (bloques 8 y 9) y queda pendiente de este guion; la versión de 40 min está en el guion.

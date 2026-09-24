@@ -5,8 +5,8 @@ Dos cuadernos de Google Colab y su material docente para la parte de herramienta
 
 | Cuaderno | Qué hace el alumno | Abrir |
 |---|---|---|
-| `notebooks/01_laboratorio_cnn_radiografias.ipynb` | Diseña una CNN con formularios, la entrena con radiografías de PneumoniaMNIST (28 o 64 px) y ve su ficha, las curvas en vivo, sensibilidad y especificidad, los mapas de activación y el Grad-CAM. Cada entrenamiento queda en un registro exportable a CSV. Retos A-D y un Plan B para el profesor. | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/<USUARIO>/<REPO>/blob/main/notebooks/01_laboratorio_cnn_radiografias.ipynb) |
-| `notebooks/02_conteo_personas_cafeteria.ipynb` | Aplica YOLO26 nano, ya entrenado, a un vídeo: detecta personas, las sigue, cuenta cuántas hay por zona y cuántas cruzan una línea, y exporta solo recuentos (CSV y JSON). Envío opcional a un webhook de n8n: con el campo vacío no se envía nada. | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/<USUARIO>/<REPO>/blob/main/notebooks/02_conteo_personas_cafeteria.ipynb) |
+| `notebooks/01_laboratorio_cnn_radiografias.ipynb` | Diseña una CNN con formularios, la entrena con radiografías de PneumoniaMNIST (28 o 64 px) y ve su ficha, las curvas en vivo, sensibilidad y especificidad, los mapas de activación y el Grad-CAM. Cada entrenamiento queda en un registro exportable a CSV. Retos A-D y un Plan B para el profesor. | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Lougedo/cnn_samples_colab/blob/main/notebooks/01_laboratorio_cnn_radiografias.ipynb) |
+| `notebooks/02_conteo_personas_cafeteria.ipynb` | Aplica YOLO26 nano, ya entrenado, a un vídeo: detecta personas, las sigue, cuenta cuántas hay por zona y cuántas cruzan una línea, y exporta solo recuentos (CSV y JSON). Envío opcional a un webhook de n8n: con el campo vacío no se envía nada. | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Lougedo/cnn_samples_colab/blob/main/notebooks/02_conteo_personas_cafeteria.ipynb) |
 
 Los dos son prototipos docentes. **POC ≠ producción:** llevar algo así a un hospital o a un local real exige medir el
 error con datos propios, decidir dónde se procesa y qué se guarda, y cumplir la normativa. El cuaderno 2 lo dice en su
@@ -20,7 +20,7 @@ al chat. Entregable: su cuaderno 1 ejecutado, con la arquitectura que ha elegido
 **Antes de clase.** Resumen; el detalle está en `docs/guion_docente_60min.md` (§1), `INFORME_FINAL.md` (secciones 5 y 6)
 y `sesiones/S7/05-checklist.md`.
 
-- 🔴 Subir los cuadernos a GitHub o Drive y cambiar `<USUARIO>/<REPO>` antes de pegar el enlace en el chat (sección 1).
+- ✅ Publicado en GitHub (https://github.com/Lougedo/cnn_samples_colab); los badges ya apuntan ahí. Copia en Drive: ver sección 1.
 - 🔴 Crear la hoja común de resultados, con la cabecera que da la primera línea de la celda 1.8 y una fila asignada a
   cada alumno.
 - 🟡 Abrir los dos cuadernos en Colab desde el enlace que vas a repartir, con una ventana privada: vista de
@@ -40,23 +40,17 @@ y `sesiones/S7/05-checklist.md`.
 
 ### Desde GitHub (badge)
 
-Los badges llevan el marcador `<USUARIO>/<REPO>`. El enlace tiene esta forma:
+Los badges apuntan a este repositorio: <https://github.com/Lougedo/cnn_samples_colab>. El enlace para el chat:
 
 ```
-https://colab.research.google.com/github/<USUARIO>/<REPO>/blob/main/notebooks/01_laboratorio_cnn_radiografias.ipynb
+https://colab.research.google.com/github/Lougedo/cnn_samples_colab/blob/main/notebooks/01_laboratorio_cnn_radiografias.ipynb
+https://colab.research.google.com/github/Lougedo/cnn_samples_colab/blob/main/notebooks/02_conteo_personas_cafeteria.ipynb
 ```
 
-- `<USUARIO>`: tu usuario u organización de GitHub. `<REPO>`: el nombre del repositorio.
-- `main` es la rama; cámbiala si la tuya se llama de otra forma. No quites `blob`.
-- La ruta `notebooks/…` supone que esta carpeta es la raíz del repositorio.
-- Solo funciona con repositorios públicos. Con uno privado, cada alumno tendría que autorizar GitHub en Colab.
-
-El badge aparece en tres sitios: este README y la primera celda de cada cuaderno. En los cuadernos no se edita el
-`.ipynb`: se cambia en el generador y se regenera (sección 5). El comando solo toca las líneas de los badges; los
-ejemplos de esta sección conservan el marcador.
+Si haces un fork, cambia el enlace en el generador y regenera (sección 5); el comando solo toca las líneas de los badges:
 
 ```bash
-sed -i '' '/badge\.svg/ s#<USUARIO>/<REPO>#tu_usuario/tu_repo#' README.md src/build_nb1.py src/build_nb2.py   # macOS
+sed -i '' '/badge\.svg/ s#Lougedo/cnn_samples_colab#tu_usuario/tu_repo#' README.md src/build_nb1.py src/build_nb2.py   # macOS
 .venv/bin/python src/build_nb1.py && .venv/bin/python src/build_nb2.py
 ```
 
@@ -297,9 +291,8 @@ doi:10.1371/journal.pmed.1002683 (aprendizaje por atajos); Selvaraju RR et al., 
 (Grad-CAM); Wang ZJ et al., IEEE TVCG 27(2) (2021), doi:10.1109/TVCG.2020.3030418 (CNN Explainer, licencia MIT; la abre
 solo el profesor compartiendo pantalla, D51).
 
-**Licencia de este repositorio: [🔴 Pendiente de confirmar].** No hay archivo de licencia (D50). Si se publica, lo
-prudente es publicar el código abierto y declarar AGPL-3.0 al menos para el NB2 y `src/build_nb2.py`. La decisión es
-del profesor.
+**Licencia de este repositorio: AGPL-3.0** (archivo `LICENSE`, D50), compatible con Ultralytics, que es AGPL-3.0.
+Los datos y vídeos no forman parte del repositorio y mantienen su propia licencia.
 
 ---
 
@@ -331,7 +324,7 @@ del profesor.
 - 🟡 Uso de GPU si el entorno la tiene: no probado.
 - 🟡 Efecto de `private_outputs` en el NB2.
 - 🟡 Origen del vídeo «personas caminando» (inferido por metadatos) y licencia del vídeo del andén (no consta).
-- 🔴 Licencia del repositorio (D50), hoja común y enlaces de los badges.
-- 🔴 Decidir si `verificacion/final/*.md` y `*.txt` se versionan con una excepción en `.gitignore`. Si se publica el
-  repositorio sin ellos, las cifras de referencia se quedan sin fuente rastreable.
+- 🔴 Hoja común de resultados.
+- ✅ `verificacion/final/hechos_para_docs.md` y `resumen_medidas.txt` se versionan (excepción en `.gitignore`) para
+  que las cifras de referencia tengan fuente rastreable.
 - 🟡 Rótulos de Google Sheets («Datos → Dividir texto en columnas»).

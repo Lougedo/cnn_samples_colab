@@ -56,6 +56,6 @@ están en `docs/notas_verificacion/`. Fecha de trabajo: 24-sep-2026.
 
 | # | Decisión | Motivo |
 |---|---|---|
-| D50 | No se añade un archivo de licencia al repositorio. Se deja como pendiente para el profesor: si se publica, lo prudente es publicar el código abierto y declarar AGPL-3.0 al menos para el NB2 y su generador. | Ultralytics es AGPL-3.0 y considera que el software que lo usa queda cubierto. Es una interpretación, no asesoramiento jurídico, y la decisión de publicar es del profesor. |
+| D50 | El repositorio se publica en <https://github.com/Lougedo/cnn_samples_colab> con licencia **AGPL-3.0** (archivo `LICENSE`, creado por el profesor al abrir el repositorio). | Ultralytics es AGPL-3.0 y considera que el software que lo usa queda cubierto; publicar todo abierto bajo AGPL evita el problema. Es una interpretación, no asesoramiento jurídico. |
 | D51 | CNN Explainer solo lo abre el profesor, compartiendo pantalla. | La web sigue cargando un script de `polyfill.io`, dominio comprometido en junio de 2024. El 24-sep-2026 ese dominio responde 403 de Cloudflare y la página funciona sin él (ensayado en navegador, `docs/notas_verificacion/h_ensayo_cnn_explainer.md`), pero puede cambiar. |
 | D52 | El guion se entrega en dos versiones: la hora completa del brief (60 min) y la de 40 min que tiene la S7 (bloques 8 y 9 de `sesiones/S7/01-esqueleto.md`, de 20:30 a 21:10). | El esqueleto de la S7 reserva 28 + 12 min y deja el ajuste pendiente de este guion. El brief manda la agenda de 60 min; la S7 real tiene 40. |

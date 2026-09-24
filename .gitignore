@@ -25,7 +25,11 @@ outputs/
 runs/
 *.csv
 *.json.out
-verificacion/
+verificacion/*
+!verificacion/final/
+verificacion/final/*
+!verificacion/final/hechos_para_docs.md
+!verificacion/final/resumen_medidas.txt
 !requirements-verificacion.txt
 
 # Sistema

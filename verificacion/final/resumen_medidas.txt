@@ -1,0 +1,192 @@
+
+####### 111900 estructura: {'01_laboratorio_cnn_radiografias.ipynb': 0}
+
+== 01_laboratorio_cnn_radiografias.ipynb modo=rapido hilos=None params={'epocas': 2} total=25.3s errores=0 stderr=0
+   [2] 1.1 Preparación                                         10.6s
+   [4] 1.2 Los datos                                           0.5s
+   [6] 1.3 Diseña tu red                                       1.3s
+   [8] 1.4 Entrena la red                                      2.7s
+   [10] 1.5 Evalúa en test                                      0.2s
+   [12] 1.6 Qué ve cada capa                                    0.7s
+   [14] 1.7 Dónde mira el modelo (Grad-CAM)                     0.6s
+   [17] 1.8 Registro de experimentos                            0.2s
+   [19] 1.9 Elige tu reto y escribe tu hipótesis                0.0s
+   [21] 1.10 Plan B (solo el profesor)                          4.3s
+   EXP {'id': 1, 'experimento': 'grupo_1', 'reto': nan, 'bloques': 2, 'pooling': 'sí', 'dropout': 0.2, 'epocas': 2, 'compensar': 'no', 'parametros': 56129, 'tiempo_entrenamiento_s': 2.2, 'acc_validacion': 0.874, 'accuracy': 0.8285, 'sensibilidad': 0.959, 'especificidad': 0.6111, 'auc': 0.9167, 'diagnostico': 'infraajuste'}
+
+== 01_laboratorio_cnn_radiografias.ipynb modo=defecto hilos=None params={} total=26.3s errores=0 stderr=0
+   [2] 1.1 Preparación                                         9.9s
+   [4] 1.2 Los datos                                           0.5s
+   [6] 1.3 Diseña tu red                                       1.2s
+   [8] 1.4 Entrena la red                                      5.5s
+   [10] 1.5 Evalúa en test                                      0.6s
+   [12] 1.6 Qué ve cada capa                                    0.3s
+   [14] 1.7 Dónde mira el modelo (Grad-CAM)                     0.6s
+   [17] 1.8 Registro de experimentos                            0.2s
+   [19] 1.9 Elige tu reto y escribe tu hipótesis                0.0s
+   [21] 1.10 Plan B (solo el profesor)                          4.1s
+   EXP {'id': 1, 'experimento': 'grupo_1', 'reto': nan, 'bloques': 2, 'pooling': 'sí', 'dropout': 0.2, 'epocas': 8, 'compensar': 'no', 'parametros': 56129, 'tiempo_entrenamiento_s': 4.0, 'acc_validacion': 0.9447, 'accuracy': 0.8766, 'sensibilidad': 0.9487, 'especificidad': 0.7564, 'auc': 0.9362, 'diagnostico': 'razonable (aún mejoraba)'}
+
+== 01_laboratorio_cnn_radiografias.ipynb modo=imposible hilos=None params={'bloques_convolucionales': 4, 'resolucion': 28} total=18.2s errores=0 stderr=0
+   [2] 1.1 Preparación                                         8.8s
+   [4] 1.2 Los datos                                           0.5s
+   [6] 1.3 Diseña tu red                                       0.2s
+   [8] 1.4 Entrena la red                                      0.0s
+   [10] 1.5 Evalúa en test                                      0.0s
+   [12] 1.6 Qué ve cada capa                                    0.0s
+   [14] 1.7 Dónde mira el modelo (Grad-CAM)                     0.0s
+   [17] 1.8 Registro de experimentos                            0.0s
+   [19] 1.9 Elige tu reto y escribe tu hipótesis                0.0s
+   [21] 1.10 Plan B (solo el profesor)                          5.0s
+   aviso_imposible: True
+
+== 01_laboratorio_cnn_radiografias.ipynb modo=referencias hilos=None params={'ejecutar_plan_b': True} total=76.7s errores=0 stderr=0
+   [2] 1.1 Preparación                                         8.7s
+   [4] 1.2 Los datos                                           0.5s
+   [6] 1.3 Diseña tu red                                       1.2s
+   [8] 1.4 Entrena la red                                      5.7s
+   [10] 1.5 Evalúa en test                                      0.2s
+   [12] 1.6 Qué ve cada capa                                    0.3s
+   [14] 1.7 Dónde mira el modelo (Grad-CAM)                     1.0s
+   [17] 1.8 Registro de experimentos                            0.4s
+   [19] 1.9 Elige tu reto y escribe tu hipótesis                0.0s
+   [21] 1.10 Plan B (solo el profesor)                          54.2s
+   EXP {'id': 1, 'experimento': 'grupo_1', 'reto': nan, 'bloques': 2, 'pooling': 'sí', 'dropout': 0.2, 'epocas': 8, 'compensar': 'no', 'parametros': 56129, 'tiempo_entrenamiento_s': 3.9, 'acc_validacion': 0.9447, 'accuracy': 0.8766, 'sensibilidad': 0.9487, 'especificidad': 0.7564, 'auc': 0.9362, 'diagnostico': 'razonable (aún mejoraba)'}
+   EXP {'id': 2, 'experimento': 'ref_defecto', 'reto': '—', 'bloques': 2, 'pooling': 'sí', 'dropout': 0.2, 'epocas': 8, 'compensar': 'no', 'parametros': 56129, 'tiempo_entrenamiento_s': 4.1, 'acc_validacion': 0.9447, 'accuracy': 0.8766, 'sensibilidad': 0.9487, 'especificidad': 0.7564, 'auc': 0.9362, 'diagnostico': 'razonable (aún mejoraba)'}
+   EXP {'id': 3, 'experimento': 'ref_A_1_bloque', 'reto': 'A', 'bloques': 1, 'pooling': 'sí', 'dropout': 0.2, 'epocas': 8, 'compensar': 'no', 'parametros': 173345, 'tiempo_entrenamiento_s': 3.0, 'acc_validacion': 0.9523, 'accuracy': 0.8413, 'sensibilidad': 0.9795, 'especificidad': 0.6111, 'auc': 0.9239, 'diagnostico': 'razonable (aún mejoraba)'}
+   EXP {'id': 4, 'experimento': 'ref_A_3_bloques', 'reto': 'A', 'bloques': 3, 'pooling': 'sí', 'dropout': 0.2, 'epocas': 8, 'compensar': 'no', 'parametros': 27521, 'tiempo_entrenamiento_s': 4.2, 'acc_validacion': 0.9256, 'accuracy': 0.8622, 'sensibilidad': 0.9462, 'especificidad': 0.7222, 'auc': 0.9362, 'diagnostico': 'razonable (aún mejoraba)'}
+   EXP {'id': 5, 'experimento': 'ref_B_sin_pooling', 'reto': 'B', 'bloques': 2, 'pooling': 'no', 'dropout': 0.2, 'epocas': 8, 'compensar': 'no', 'parametros': 1184577, 'tiempo_entrenamiento_s': 7.7, 'acc_validacion': 0.9561, 'accuracy': 0.8654, 'sensibilidad': 0.9795, 'especificidad': 0.6752, 'auc': 0.9272, 'diagnostico': 'razonable'}
+   EXP {'id': 6, 'experimento': 'ref_C_dropout_0_20_epocas', 'reto': 'C', 'bloques': 2, 'pooling': 'no', 'dropout': 0.0, 'epocas': 20, 'compensar': 'no', 'parametros': 1184577, 'tiempo_entrenamiento_s': 15.0, 'acc_validacion': 0.958, 'accuracy': 0.875, 'sensibilidad': 0.9821, 'especificidad': 0.6966, 'auc': 0.9388, 'diagnostico': 'sobreajuste'}
+   EXP {'id': 7, 'experimento': 'ref_C_dropout_05_20_epocas', 'reto': 'C', 'bloques': 2, 'pooling': 'no', 'dropout': 0.5, 'epocas': 20, 'compensar': 'no', 'parametros': 1184577, 'tiempo_entrenamiento_s': 14.8, 'acc_validacion': 0.9599, 'accuracy': 0.8814, 'sensibilidad': 0.9795, 'especificidad': 0.7179, 'auc': 0.9464, 'diagnostico': 'razonable'}
+   EXP {'id': 8, 'experimento': 'ref_D_compensar_desbalanceo', 'reto': 'D', 'bloques': 2, 'pooling': 'sí', 'dropout': 0.2, 'epocas': 8, 'compensar': 'sí', 'parametros': 56129, 'tiempo_entrenamiento_s': 4.1, 'acc_validacion': 0.9256, 'accuracy': 0.8782, 'sensibilidad': 0.9385, 'especificidad': 0.7778, 'auc': 0.9312, 'diagnostico': 'razonable (aún mejoraba)'}
+
+####### 112156 estructura: {'01_laboratorio_cnn_radiografias.ipynb': 0}
+
+== 01_laboratorio_cnn_radiografias.ipynb modo=defecto hilos=2 params={} total=30.4s errores=0 stderr=0
+   [2] 1.1 Preparación                                         9.6s
+   [4] 1.2 Los datos                                           0.5s
+   [6] 1.3 Diseña tu red                                       1.5s
+   [8] 1.4 Entrena la red                                      8.2s
+   [10] 1.5 Evalúa en test                                      0.6s
+   [12] 1.6 Qué ve cada capa                                    0.3s
+   [14] 1.7 Dónde mira el modelo (Grad-CAM)                     0.6s
+   [17] 1.8 Registro de experimentos                            0.2s
+   [19] 1.9 Elige tu reto y escribe tu hipótesis                0.0s
+   [21] 1.10 Plan B (solo el profesor)                          4.6s
+   EXP {'id': 1, 'experimento': 'grupo_1', 'reto': nan, 'bloques': 2, 'pooling': 'sí', 'dropout': 0.2, 'epocas': 8, 'compensar': 'no', 'parametros': 56129, 'tiempo_entrenamiento_s': 6.7, 'acc_validacion': 0.9485, 'accuracy': 0.8686, 'sensibilidad': 0.9487, 'especificidad': 0.735, 'auc': 0.9362, 'diagnostico': 'razonable (aún mejoraba)'}
+
+== 01_laboratorio_cnn_radiografias.ipynb modo=referencias hilos=2 params={'ejecutar_plan_b': True} total=145.1s errores=0 stderr=0
+   [2] 1.1 Preparación                                         8.9s
+   [4] 1.2 Los datos                                           0.5s
+   [6] 1.3 Diseña tu red                                       1.3s
+   [8] 1.4 Entrena la red                                      8.4s
+   [10] 1.5 Evalúa en test                                      0.6s
+   [12] 1.6 Qué ve cada capa                                    0.3s
+   [14] 1.7 Dónde mira el modelo (Grad-CAM)                     0.6s
+   [17] 1.8 Registro de experimentos                            0.2s
+   [19] 1.9 Elige tu reto y escribe tu hipótesis                0.0s
+   [21] 1.10 Plan B (solo el profesor)                          120.7s
+   EXP {'id': 1, 'experimento': 'grupo_1', 'reto': nan, 'bloques': 2, 'pooling': 'sí', 'dropout': 0.2, 'epocas': 8, 'compensar': 'no', 'parametros': 56129, 'tiempo_entrenamiento_s': 6.9, 'acc_validacion': 0.9485, 'accuracy': 0.8686, 'sensibilidad': 0.9487, 'especificidad': 0.735, 'auc': 0.9362, 'diagnostico': 'razonable (aún mejoraba)'}
+   EXP {'id': 2, 'experimento': 'ref_defecto', 'reto': '—', 'bloques': 2, 'pooling': 'sí', 'dropout': 0.2, 'epocas': 8, 'compensar': 'no', 'parametros': 56129, 'tiempo_entrenamiento_s': 6.7, 'acc_validacion': 0.9485, 'accuracy': 0.8686, 'sensibilidad': 0.9487, 'especificidad': 0.735, 'auc': 0.9362, 'diagnostico': 'razonable (aún mejoraba)'}
+   EXP {'id': 3, 'experimento': 'ref_A_1_bloque', 'reto': 'A', 'bloques': 1, 'pooling': 'sí', 'dropout': 0.2, 'epocas': 8, 'compensar': 'no', 'parametros': 173345, 'tiempo_entrenamiento_s': 5.5, 'acc_validacion': 0.9523, 'accuracy': 0.8446, 'sensibilidad': 0.9795, 'especificidad': 0.6197, 'auc': 0.924, 'diagnostico': 'razonable (aún mejoraba)'}
+   EXP {'id': 4, 'experimento': 'ref_A_3_bloques', 'reto': 'A', 'bloques': 3, 'pooling': 'sí', 'dropout': 0.2, 'epocas': 8, 'compensar': 'no', 'parametros': 27521, 'tiempo_entrenamiento_s': 7.4, 'acc_validacion': 0.9294, 'accuracy': 0.8574, 'sensibilidad': 0.9462, 'especificidad': 0.7094, 'auc': 0.9362, 'diagnostico': 'razonable (aún mejoraba)'}
+   EXP {'id': 5, 'experimento': 'ref_B_sin_pooling', 'reto': 'B', 'bloques': 2, 'pooling': 'no', 'dropout': 0.2, 'epocas': 8, 'compensar': 'no', 'parametros': 1184577, 'tiempo_entrenamiento_s': 16.5, 'acc_validacion': 0.958, 'accuracy': 0.8734, 'sensibilidad': 0.9795, 'especificidad': 0.6966, 'auc': 0.9272, 'diagnostico': 'razonable'}
+   EXP {'id': 6, 'experimento': 'ref_C_dropout_0_20_epocas', 'reto': 'C', 'bloques': 2, 'pooling': 'no', 'dropout': 0.0, 'epocas': 20, 'compensar': 'no', 'parametros': 1184577, 'tiempo_entrenamiento_s': 38.3, 'acc_validacion': 0.9542, 'accuracy': 0.8686, 'sensibilidad': 0.9846, 'especificidad': 0.6752, 'auc': 0.9411, 'diagnostico': 'sobreajuste'}
+   EXP {'id': 7, 'experimento': 'ref_C_dropout_05_20_epocas', 'reto': 'C', 'bloques': 2, 'pooling': 'no', 'dropout': 0.5, 'epocas': 20, 'compensar': 'no', 'parametros': 1184577, 'tiempo_entrenamiento_s': 37.6, 'acc_validacion': 0.9656, 'accuracy': 0.8782, 'sensibilidad': 0.9795, 'especificidad': 0.7094, 'auc': 0.9454, 'diagnostico': 'razonable'}
+   EXP {'id': 8, 'experimento': 'ref_D_compensar_desbalanceo', 'reto': 'D', 'bloques': 2, 'pooling': 'sí', 'dropout': 0.2, 'epocas': 8, 'compensar': 'sí', 'parametros': 56129, 'tiempo_entrenamiento_s': 6.9, 'acc_validacion': 0.9275, 'accuracy': 0.8814, 'sensibilidad': 0.9436, 'especificidad': 0.7778, 'auc': 0.9303, 'diagnostico': 'razonable (aún mejoraba)'}
+
+####### 112249 estructura: {'01_laboratorio_cnn_radiografias.ipynb': 0}
+
+== 01_laboratorio_cnn_radiografias.ipynb modo=rapido hilos=None params={'epocas': 2} total=24.7s errores=0 stderr=0
+   [2] 1.1 Preparación                                         9.9s
+   [4] 1.2 Los datos                                           0.5s
+   [6] 1.3 Diseña tu red                                       1.3s
+   [8] 1.4 Entrena la red                                      2.6s
+   [10] 1.5 Evalúa en test                                      0.2s
+   [12] 1.6 Qué ve cada capa                                    0.7s
+   [14] 1.7 Dónde mira el modelo (Grad-CAM)                     0.5s
+   [17] 1.8 Registro de experimentos                            0.2s
+   [19] 1.9 Elige tu reto y escribe tu hipótesis                0.0s
+   [21] 1.10 Plan B (solo el profesor)                          4.1s
+   EXP {'id': 1, 'experimento': 'grupo_1', 'reto': nan, 'bloques': 2, 'pooling': 'sí', 'dropout': 0.2, 'epocas': 2, 'compensar': 'no', 'parametros': 56129, 'tiempo_entrenamiento_s': 2.1, 'acc_validacion': 0.874, 'accuracy': 0.8285, 'sensibilidad': 0.959, 'especificidad': 0.6111, 'auc': 0.9167, 'diagnostico': 'infraajuste'}
+
+== 01_laboratorio_cnn_radiografias.ipynb modo=defecto hilos=None params={} total=26.2s errores=0 stderr=0
+   [2] 1.1 Preparación                                         8.5s
+   [4] 1.2 Los datos                                           0.5s
+   [6] 1.3 Diseña tu red                                       1.2s
+   [8] 1.4 Entrena la red                                      5.9s
+   [10] 1.5 Evalúa en test                                      0.2s
+   [12] 1.6 Qué ve cada capa                                    0.3s
+   [14] 1.7 Dónde mira el modelo (Grad-CAM)                     0.6s
+   [17] 1.8 Registro de experimentos                            0.2s
+   [19] 1.9 Elige tu reto y escribe tu hipótesis                0.0s
+   [21] 1.10 Plan B (solo el profesor)                          4.2s
+   EXP {'id': 1, 'experimento': 'grupo_1', 'reto': nan, 'bloques': 2, 'pooling': 'sí', 'dropout': 0.2, 'epocas': 8, 'compensar': 'no', 'parametros': 56129, 'tiempo_entrenamiento_s': 4.1, 'acc_validacion': 0.9447, 'accuracy': 0.8766, 'sensibilidad': 0.9487, 'especificidad': 0.7564, 'auc': 0.9362, 'diagnostico': 'razonable (aún mejoraba)'}
+
+####### 112333 estructura: {'02_conteo_personas_cafeteria.ipynb': 0}
+
+== 02_conteo_personas_cafeteria.ipynb modo=rapido hilos=None params={'segundos_a_procesar': 3} total=17.3s errores=0 stderr=0
+   [2] 2.1 Preparación (la primera vez tarda 1-2 minutos)      3.7s
+   [4] 2.2 Elige el vídeo                                      0.4s
+   [7] 2.3 Qué ve el detector                                  2.3s
+   [9] 2.4 Zonas y línea de puerta                             0.5s
+   [11] 2.5 Aforo por zonas                                     3.7s
+   [13] 2.6 Entradas y salidas por la línea                     3.2s
+   [15] 2.7 Tiempo de permanencia (opcional)                    0.1s
+   [17] 2.8 Exportar CSV y JSON                                 0.0s
+   [18] 2.8 (opcional) Enviar el resumen a n8n                  0.0s
+   RESUMEN {"video": "people-walking.mp4", "inicio_s": 0, "resolucion_proceso": "1280x720", "fps_video": 25.0, "saltar_fotogramas": 2, "segundos_procesados": 3.0, "fotogramas_procesados": 38, "confianza_minima": 0.35, "zonas": {"Izquierda": {"maximo": 13, "media": 11.16}, "Derecha": {"maximo": 11, "media": 8.5}}, "entradas": 2, "salidas": 3, "permanencia_media_s": {"Izquierda": 2.9, "Derecha": 2.5}, "permanencia_estancias": 20, "permanencia_recortadas": 20, "tiempos_proceso_s": {"aforo": 2.8, "linea": 3.1}, "generado_en": "2026-09-24T11:23:04+02:00", "nota": "Solo agregados: sin imágenes ni identificadores."}
+
+== 02_conteo_personas_cafeteria.ipynb modo=defecto hilos=None params={} total=26.2s errores=0 stderr=0
+   [2] 2.1 Preparación (la primera vez tarda 1-2 minutos)      3.4s
+   [4] 2.2 Elige el vídeo                                      0.4s
+   [7] 2.3 Qué ve el detector                                  2.3s
+   [9] 2.4 Zonas y línea de puerta                             0.4s
+   [11] 2.5 Aforo por zonas                                     8.6s
+   [13] 2.6 Entradas y salidas por la línea                     7.7s
+   [15] 2.7 Tiempo de permanencia (opcional)                    0.1s
+   [17] 2.8 Exportar CSV y JSON                                 0.0s
+   [18] 2.8 (opcional) Enviar el resumen a n8n                  0.0s
+   RESUMEN {"video": "people-walking.mp4", "inicio_s": 0, "resolucion_proceso": "1280x720", "fps_video": 25.0, "saltar_fotogramas": 2, "segundos_procesados": 10.0, "fotogramas_procesados": 125, "confianza_minima": 0.35, "zonas": {"Izquierda": {"maximo": 14, "media": 10.97}, "Derecha": {"maximo": 13, "media": 9.49}}, "entradas": 8, "salidas": 8, "permanencia_media_s": {"Izquierda": 5.6, "Derecha": 5.7}, "permanencia_estancias": 35, "permanencia_recortadas": 30, "tiempos_proceso_s": {"aforo": 8.0, "linea": 7.6}, "generado_en": "2026-09-24T11:23:31+02:00", "nota": "Solo agregados: sin imágenes ni identificadores."}
+
+####### 112406 estructura: {'02_conteo_personas_cafeteria.ipynb': 0}
+
+== 02_conteo_personas_cafeteria.ipynb modo=defecto hilos=None params={'fuente_video': 'Demo 2: andén de metro (interior)'} total=32.6s errores=0 stderr=0
+   [2] 2.1 Preparación (la primera vez tarda 1-2 minutos)      3.2s
+   [4] 2.2 Elige el vídeo                                      1.0s
+   [7] 2.3 Qué ve el detector                                  2.6s
+   [9] 2.4 Zonas y línea de puerta                             0.4s
+   [11] 2.5 Aforo por zonas                                     11.3s
+   [13] 2.6 Entradas y salidas por la línea                     11.3s
+   [15] 2.7 Tiempo de permanencia (opcional)                    0.1s
+   [17] 2.8 Exportar CSV y JSON                                 0.0s
+   [18] 2.8 (opcional) Enviar el resumen a n8n                  0.0s
+   RESUMEN {"video": "subway.mp4", "inicio_s": 22, "resolucion_proceso": "720x1280", "fps_video": 29.97, "saltar_fotogramas": 2, "segundos_procesados": 10.01, "fotogramas_procesados": 150, "confianza_minima": 0.35, "zonas": {"Izquierda": {"maximo": 6, "media": 2.91}, "Derecha": {"maximo": 7, "media": 4.42}}, "entradas": 9, "salidas": 3, "permanencia_media_s": {"Izquierda": 2.3, "Derecha": 2.1}, "permanencia_estancias": 29, "permanencia_recortadas": 8, "tiempos_proceso_s": {"aforo": 10.6, "linea": 11.3}, "generado_en": "2026-09-24T11:24:04+02:00", "nota": "Solo agregados: sin imágenes ni identificadores."}
+
+####### 112438 estructura: {'02_conteo_personas_cafeteria.ipynb': 0}
+
+== 02_conteo_personas_cafeteria.ipynb modo=defecto hilos=1 params={} total=31.1s errores=0 stderr=0
+   [2] 2.1 Preparación (la primera vez tarda 1-2 minutos)      3.1s
+   [4] 2.2 Elige el vídeo                                      0.4s
+   [7] 2.3 Qué ve el detector                                  2.6s
+   [9] 2.4 Zonas y línea de puerta                             0.4s
+   [11] 2.5 Aforo por zonas                                     11.5s
+   [13] 2.6 Entradas y salidas por la línea                     10.6s
+   [15] 2.7 Tiempo de permanencia (opcional)                    0.1s
+   [17] 2.8 Exportar CSV y JSON                                 0.0s
+   [18] 2.8 (opcional) Enviar el resumen a n8n                  0.0s
+   RESUMEN {"video": "people-walking.mp4", "inicio_s": 0, "resolucion_proceso": "1280x720", "fps_video": 25.0, "saltar_fotogramas": 2, "segundos_procesados": 10.0, "fotogramas_procesados": 125, "confianza_minima": 0.35, "zonas": {"Izquierda": {"maximo": 14, "media": 10.97}, "Derecha": {"maximo": 13, "media": 9.49}}, "entradas": 8, "salidas": 8, "permanencia_media_s": {"Izquierda": 5.6, "Derecha": 5.7}, "permanencia_estancias": 35, "permanencia_recortadas": 30, "tiempos_proceso_s": {"aforo": 10.7, "linea": 10.6}, "generado_en": "2026-09-24T11:24:36+02:00", "nota": "Solo agregados: sin imágenes ni identificadores."}
+
+####### 112517 estructura: {'02_conteo_personas_cafeteria.ipynb': 0}
+
+== 02_conteo_personas_cafeteria.ipynb modo=defecto hilos=1 params={'fuente_video': 'Demo 2: andén de metro (interior)'} total=38.4s errores=0 stderr=0
+   [2] 2.1 Preparación (la primera vez tarda 1-2 minutos)      3.1s
+   [4] 2.2 Elige el vídeo                                      1.0s
+   [7] 2.3 Qué ve el detector                                  2.8s
+   [9] 2.4 Zonas y línea de puerta                             0.4s
+   [11] 2.5 Aforo por zonas                                     14.4s
+   [13] 2.6 Entradas y salidas por la línea                     14.1s
+   [15] 2.7 Tiempo de permanencia (opcional)                    0.1s
+   [17] 2.8 Exportar CSV y JSON                                 0.0s
+   [18] 2.8 (opcional) Enviar el resumen a n8n                  0.0s
+   RESUMEN {"video": "subway.mp4", "inicio_s": 22, "resolucion_proceso": "720x1280", "fps_video": 29.97, "saltar_fotogramas": 2, "segundos_procesados": 10.01, "fotogramas_procesados": 150, "confianza_minima": 0.35, "zonas": {"Izquierda": {"maximo": 6, "media": 2.91}, "Derecha": {"maximo": 7, "media": 4.42}}, "entradas": 9, "salidas": 3, "permanencia_media_s": {"Izquierda": 2.3, "Derecha": 2.1}, "permanencia_estancias": 29, "permanencia_recortadas": 8, "tiempos_proceso_s": {"aforo": 13.6, "linea": 13.9}, "generado_en": "2026-09-24T11:25:15+02:00", "nota": "Solo agregados: sin imágenes ni identificadores."}

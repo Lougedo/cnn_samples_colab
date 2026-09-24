@@ -103,9 +103,8 @@ slide 27; 🟡 no consta si se llegó a dar). Si se dio, en 8e/3b basta con reco
 
 ## 1. Antes de clase (en orden)
 
-1. **Subir los cuadernos y tener el enlace.** Sube `notebooks/01_…ipynb` y `02_…ipynb` a GitHub o a Drive. El badge de
-   la portada apunta a `<USUARIO>/<REPO>`: cámbialo o quítalo antes de subirlo al aula virtual. [🔴 Pendiente de confirmar: enlace final]
-   - Si publicas en GitHub, decide antes la licencia del repositorio (D50: AGPL-3.0 al menos para el cuaderno 2). 🔴
+1. **Enlace de los cuadernos.** Publicados en https://github.com/Lougedo/cnn_samples_colab (licencia AGPL-3.0, D50) y copiados en Drive. El enlace para el chat
+   es el badge de la portada (Colab desde GitHub) o el de la copia de Drive compartida como lector.
 2. **Probar el enlace en una ventana privada**, como alumno: que se ve la vista de formulario sin código, los rótulos que
    van en el mensaje del chat («Ejecutar de todos modos» y «Archivo → Guardar una copia en Drive») 🟡, cuánto tardan 1.1 y 1.2
    la primera vez [🔴 no medido] y que no pide reiniciar la sesión (🟡 sin comprobar con Python 3.13; la resolución de paquetes
@@ -958,7 +957,7 @@ Pro con un Xeon de 2,2 GHz (🟡, no medido en Colab).
 
 ## Pendientes de validar
 
-- 🔴 Enlace definitivo de los cuadernos y badge `<USUARIO>/<REPO>`; licencia del repositorio si se publica en GitHub (D50).
+- ✅ Enlace de los cuadernos: https://github.com/Lougedo/cnn_samples_colab (AGPL-3.0, D50).
 - 🔴 Hoja común: sin crear. Probar que la línea pegada desde Colab se reparte en columnas 🟡.
 - 🔴 Lista de matriculados para el reparto A-B-C-D: no consta en el repositorio.
 - 🔴 Tiempo de la primera instalación en Colab (1.1 y 2.1).

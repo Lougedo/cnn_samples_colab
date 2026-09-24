@@ -46,7 +46,7 @@ FALTA_PREPARACION = '''print("⚠️ Primero ejecuta la celda 1.1 · Preparació
 md(r'''
 # Cuaderno 1 · Una CNN por dentro con radiografías de tórax
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/<USUARIO>/<REPO>/blob/main/notebooks/01_laboratorio_cnn_radiografias.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Lougedo/cnn_samples_colab/blob/main/notebooks/01_laboratorio_cnn_radiografias.ipynb)
 
 Vas a diseñar una red neuronal convolucional (CNN) sin escribir código y a entrenarla para distinguir
 radiografías de tórax normales de radiografías con neumonía. Después verás qué ha aprendido cada capa

@@ -48,7 +48,7 @@ def paso(titulo, formulario, cuerpo):
 md(r'''
 # Contar personas en vídeo con una CNN preentrenada
 
-[![Abrir en Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/<USUARIO>/<REPO>/blob/main/notebooks/02_conteo_personas_cafeteria.ipynb)
+[![Abrir en Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Lougedo/cnn_samples_colab/blob/main/notebooks/02_conteo_personas_cafeteria.ipynb)
 
 **Qué vamos a hacer.** Aplicar a un vídeo un detector de personas que ya viene entrenado (YOLO26 nano). Sin entrenar nada, vamos a detectar personas en cada fotograma, seguirlas de un fotograma al siguiente, contar cuántas hay en cada zona y cuántas cruzan una línea, y exportar solo recuentos, sin imágenes, para que n8n pueda usarlos.
 
