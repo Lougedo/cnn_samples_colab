@@ -1,0 +1,32 @@
+# Entornos
+.venv/
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Datos, pesos, vídeos y salidas (nada de esto va a git)
+datos/
+data/
+*.npz
+*.pt
+*.pth
+*.onnx
+*.h5
+*.keras
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+salidas/
+outputs/
+runs/
+*.csv
+*.json.out
+verificacion/
+!requirements-verificacion.txt
+
+# Sistema
+.DS_Store
+~$*
