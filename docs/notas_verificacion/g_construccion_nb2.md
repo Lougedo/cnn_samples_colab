@@ -182,3 +182,73 @@ Solo se tocó `src/build_nb2.py`; el `.ipynb` se regeneró (determinista, SHA-1 
 Carga media del equipo de 6 a 8 durante las medidas: tiempos con ruido. Imágenes revisadas: detección de 2.3 (etiquetas a 12 pt), vistas previas de zonas de ambas demos, fotogramas de los cuatro vídeos anotados a su ancho de pantalla (854 y 360 px) e histograma de permanencia de la demo 2.
 
 **Queda:** en los grupos apretados de la demo 1 dos etiquetas de confianza de 2.3 se siguen tapando (con letra mayor, algo más que antes); el recuento y la curva no dependen de ellas. En la demo 2 (vídeo vertical mostrado a 360 px) las etiquetas «ID n» quedan en unos 11 px. El texto «borra esas salidas» no nombra el menú de Colab: los nombres de menú en español no están comprobados (nota e).
+
+---
+
+## Correcciones tras las revisiones adversariales (24-sep-2026)
+
+Entrada: dos revisiones (alumno y técnica) y el veredicto de un escéptico por hallazgo; cuando no coincidían, se aplicó la corrección del escéptico. Solo se tocó `src/build_nb2.py` y el `.ipynb` se regeneró. Dos ejecuciones dan el mismo SHA-1: `66c06c020fc98511e2713c2ed45314fa87c7c8cc`. No cambió ningún nombre de parámetro de formulario ni ningún campo del CSV. El JSON conserva todos los campos del contrato y suma dos. Copias de antes y material de prueba en `verificacion/fix2_nb2/`.
+
+### Qué cambió
+
+| Dónde | Cambio |
+|---|---|
+| 2.3 ℹ️ (mayor) | Dice que cada persona sin caja es un falso negativo (suelen ser pequeñas, del fondo o en grupo) y que entonces 2.5 y 2.6 se quedan cortos. A 0,70 ya no pone «menos errores», sino «casi no pone cajas falsas, pero pierde muchas más personas reales». No se afirma que falten «sobre todo las del fondo», porque el mismo texto sale con el vídeo del alumno |
+| 2.9 Límites | Viñeta nueva, **Tamaño**: el detector reduce la imagen a 640 px de lado largo y pierde a las personas pequeñas o lejanas. **Perspectiva** reescrita (centro de la caja, más o menos a la cintura; con cámara inclinada alguien cuenta en una zona que no pisa) |
+| Demo 2, sentido (mayor) | Clave `sentido` en `DEMOS` (solo demo 2). Con la línea «auto», el ℹ️ de 2.4 dice que entrada es alejarse del tren hacia el andén (por ejemplo, al bajar) y salida es ir hacia el tren. El ✅ de 2.6 queda «Entradas (se alejan del tren): 9 · Salidas (van hacia el tren): 3». Con `invertir_sentido` los textos se intercambian. No se escribe «bajan del tren»: nadie ha comprobado que los 9 bajen (uno es el ID 3, contado por un temblor de 1 px) |
+| 2.4 ℹ️, línea inclinada | Si la línea forma más de unos 11° con la horizontal y con la vertical (en px), se añade: «solo importa si la persona se mueve hacia la derecha o hacia la izquierda, no a qué lado de la línea acaba» |
+| Demo 2, historia | Clave `historia`: ℹ️ en 2.2 «Empezamos en el segundo 22, con el tren ya parado y las puertas abiertas: unos bajan, otros suben y el andén se vacía». En 2.4 (md): la izquierda es el lado del tren y se puede renombrar |
+| 2.4 md y título | La coma separa x de y y los decimales van con punto (`12.5,30`). El título pasa a «(se escriben, no se dibujan con el ratón)», también en el índice |
+| 2.4 formulario | Nota de la línea: «escribe 2 puntos (`x,y; x,y`) o deja «auto»», con lo que hace «auto» en tu vídeo y para qué sirve `invertir_sentido` |
+| 2.4 vista previa | La línea se dibuja en `#7B0068`, el mismo morado que usa ObjectCounter en el vídeo. La flecha y el rótulo siguen en naranja. En el md de 2.6: «la línea de puerta es la morada y la flecha naranja marca el sentido de entrada» |
+| Privacidad del CSV (portada y 2.8) | Portada: «solo llevan recuentos… Aun así, un recuento muy fino puede señalar a alguien (lo vemos en 2.8)» y «exportar solo recuentos, sin imágenes» en lugar de «los totales». ℹ️ de 2.8: se quita el ejemplo de las 9:02, que queda solo para la pregunta 3 de 2.9. Se añade que el CSV va instante a instante (cada 0,08 s en la demo 1 y 0,07 s en la demo 2) porque es una práctica, y que en un sistema real se agregaría por minutos y no se guardarían los recuentos bajos |
+| Borrar resultados | Aviso de 2.2 (demo 2) y viñeta de la portada: «Editar → Borrar todos los resultados» (en inglés, *Edit → Clear all outputs*). En Colab, `datos/tmp/` se borra al cerrar la sesión. Además, metadatos `colab.private_outputs = true`, para que Colab no guarde los resultados (los vídeos con caras) al guardar el cuaderno |
+| Portada, demo del andén | En lugar de «La usamos solo para la demostración en clase»: vídeo de pruebas sin origen publicado, base legal desconocida, no se redistribuye, y en un proyecto real sería lo primero que habría que resolver. No se dice «no lo guardamos», porque el cuaderno sí lo descarga y lo incrusta |
+| Portada, licencias | AGPL: «si distribuyes… o una versión modificada que otros usen por internet… darles el código fuente; Ultralytics entiende que eso alcanza a toda tu aplicación» (lo 🟡 de la nota f ya no va como hecho). Vídeos: MIT cubre el código y no los vídeos; el del andén no tiene origen conocido; «su licencia es la de su fuente, que en el del andén no consta». Telemetría: sin «anónimas»; se dice que envía un identificador fijo del equipo calculado a partir de su dirección de red (hash SHA-256 del MAC en `events.py`) |
+| Portada, otros | Enlace a las Directrices 3/2019 del CEPD. «Vuelve a ejecutar esa celda y las que vienen detrás». Aviso condicional de Colab («Si al pulsarlo Colab avisa… pulsa «Ejecutar de todos modos»») |
+| 2.1 | Fila GPU «no hay (no hace falta: el cuaderno está pensado para CPU)». Instalación: «Instalando el detector y sus herramientas…» sin versiones. El ✅ dice que la tabla es para el profesor |
+| 2.2 formulario | `saltar_fotogramas`: 1 = todos, 2 = uno de cada dos, 3 = uno de cada tres; con saltos grandes el seguimiento suele perder más gente |
+| 2.2 plan B | `urlretrieve` (sin timeout) → `urlopen(url, timeout=60)` + `shutil.copyfileobj` a `.parcial` y renombrado |
+| Nota para el profesor | Empieza por «(si eres alumno, sáltala y sigue con 2.3)». El clip de Pexels lleva «(ángulo sin comprobar: pruébalo antes)» |
+| 2.3 md | Reescrito sin jerga suelta: versión más pequeña, casi todo convolucional y mucho mayor que la red del NB1, un par de bloques de atención («piezas que miran la imagen entera a la vez», para no romper la regla 6 de la nota f), *backbone* y cabezas explicados, qué es la confianza |
+| 2.3 otros | Nota del umbral: «El valor que dejes aquí es el que usan 2.5 y 2.6». Aviso < 0,25: la caja dudosa no inicia un seguimiento, solo mantiene uno que ya existía (`new_track_thresh` 0,25 y `track_low_thresh` 0,1). Aviso de tiempo: «vuelve a ejecutar 2.2, 2.3 y 2.4» |
+| 2.5 | Md: qué es ocupación y qué es aforo permitido, y que el ID es una etiqueta y no un recuento. ℹ️ de la gráfica reescrito: la línea es la ocupación de cada instante, y círculos y cuadrados solo distinguen las dos líneas |
+| Tiempos (2.5 y 2.6) | Una sola línea de progreso: «Procesados 125 fotogramas en 8,5 s (14,6 por segundo); 9,1 s contando la conversión del vídeo». Se quitan los ℹ️ de tiempo de 2.5 y 2.6, que mezclaban segundos totales con la velocidad del bucle |
+| 2.6 md | Doble conteo: cada ID cuenta una vez, en su primer cruce, y si entra y vuelve a salir su salida no cuenta. Viñeta nueva **Temblor sobre la línea** |
+| 2.7 | Si más de la mitad de las estancias están recortadas: «Con un tramo de 10,0 s estas cifras dicen poco: 30 de 35 estancias…; para medir permanencia hacen falta minutos de vídeo». Si no, el aviso de antes con «8 de 29 estancias» en lugar de «estancia(s)». Sin estancias, no hay aviso |
+| 2.8 JSON | Campos nuevos: `permanencia_estancias` y `permanencia_recortadas` (`null` si no se ejecutó 2.7). `generado_en` con zona horaria (`astimezone()`, p. ej. `2026-09-24T10:53:07+02:00`). En `ESTADO`, `permanencia` pasa a ser `{"media_s", "estancias", "recortadas"}` (dato interno; el JSON sigue exportando `permanencia_media_s` igual que antes) |
+| 2.8 md y tabla | Aviso de las descargas múltiples en Colab. Cabecera: «Segundos desde el inicio del tramo (columna t_s)» |
+| 2.8 webhook | Nota del formulario: «Opcional. Si tienes un flujo de n8n con un nodo Webhook (método POST) escuchando…». Un 404 explica método POST (en GET por defecto), «Listen for test event» y flujo activado (publicado), y muestra los primeros 200 caracteres de la respuesta de n8n. `http.client.HTTPException` (BadStatusLine, IncompleteRead) va con los errores de conexión y ya no deja traza |
+| Flujo n8n (md) | Una línea: el máximo es de un solo fotograma y puede ser un parpadeo; en un sistema real se usaría el que se mantiene unos segundos |
+
+### Qué no se aplicó, y por qué
+
+- **Badge `<USUARIO>/<REPO>`**: el generador se queda como está, porque BRIEF §11 exige ese marcador. **Pendiente para el profesor:** sustituirlo o quitar el badge antes de subir el cuaderno al aula virtual (añadir al checklist previo a clase).
+- **Renombrar 2.5 a «Ocupación por zonas»**: no. «Aforo por zonas» es el nombre del spec y del BRIEF y está también en `PASOS` y en el índice. Se añadió la línea que distingue ocupación de aforo permitido.
+- **Subir el markdown del flujo de n8n por encima de la celda del webhook**: no, porque rompería su «recibe el JSON de arriba». Solo cambió la nota del formulario.
+- **Campo `maximo_1s` en el JSON (mediana móvil de 1 s)**: no. Añade un campo y su explicación para alumnos no técnicos, y el ejemplo del IF (> 12) salta igual con 14 que con 13. Se dejó la línea de aviso bajo el flujo.
+- **CSV agregado por segundo**: no. El `agg(['max','mean'])` propuesto da columnas MultiIndex y rompe el formato del spec (`t_s` + una columna por zona). El texto explica cómo se haría en un sistema real.
+- **Cabecera de la tabla de 2.4 («la coma separa x de y»)**: no, es ruido. La aclaración está en el markdown.
+- **Título nuevo en el histograma de 2.7**: no hacía falta. Los ejes ya dicen qué es cada barra.
+- **Redirección http → https en el webhook** (urllib convierte el POST en un GET sin cuerpo): no se trata. Es poco probable con la URL copiada de n8n, y el caso acaba en el 404 explicado.
+- **Repetir «no es asesoramiento jurídico» en Licencias**: no. Es opcional, y el aviso ya está en el recuadro de privacidad de la misma portada.
+- **`ESTADO["permanencia"] = medias`** (lo que pedía el escéptico): no se siguió al pie de la letra. El contrato es el JSON, no `ESTADO`. Un diccionario en una sola clave evita tener que añadir otra clave a `DEPENDEN` y a `reiniciar`.
+
+### Verificación
+
+| Ejecución | Resultado | 2.3 + 2.5 + 2.6 |
+|---|---|---|
+| `--modos rapido` | ✅ 38 fotogramas; 13/11; 2/3; aviso «20 de 20 estancias… dicen poco» | 8,9 s |
+| `--modos defecto` | ✅ 17 / 39 / 4 personas en 2.3; zonas 14/13, media 11,0/9,5; **8/8**; «30 de 35 estancias», aviso fuerte; JSON con `permanencia_estancias` 35 y `permanencia_recortadas` 30 | 20,8 s |
+| `--modos defecto --set 'fuente_video="Demo 2: andén de metro (interior)"'` | ✅ ℹ️ de historia; ℹ️ de 2.4 con línea inclinada y sentido del andén; «Entradas (se alejan del tren): 9 · Salidas (van hacia el tren): 3»; zonas 6/7; «8 de 29 estancias», aviso suave; CSV cada 0,07 s | 26,2 s |
+| `--modos rapido --set 'zona_1="10,10; 20"'` | ✅ «No entiendo la zona 1…» y «Falta el paso anterior…» en las siguientes, sin traza | — |
+| `--modos rapido --set webhook_n8n=…:8765` (servidor local que responde 404 con el cuerpo de n8n) | ✅ consejo de POST, «Listen for test event» y la respuesta de n8n | — |
+| `--modos rapido --set webhook_n8n=…:8766` (respuesta sin línea de estado HTTP) | ✅ «No he podido conectar…», sin traza | — |
+
+Ninguna ejecución tiene salidas `error` ni `stderr`. Todas las celdas de código compilan con Python 3.9, así que ninguna f-string reutiliza su comilla. Imágenes revisadas: vista previa de zonas de las dos demos (línea morada, flecha naranja) y último fotograma del vídeo de 2.6 de la demo 2 (línea morada, «Entradas: 9 · Salidas: 3»).
+
+### Pendiente o sin comprobar
+
+- 🟡 **`colab.private_outputs`**: es la opción de Colab «Omitir el resultado de las celdas de código al guardar este cuaderno». No se ha comprobado en Colab que la clave se respete al abrir el cuaderno desde GitHub o Drive. Si no se respeta, queda el aviso de borrar los resultados.
+- 🟡 **Nombres de menús y botones**: «Editar → Borrar todos los resultados» y «Ejecutar de todos modos» (Colab en español), y «Listen for test event» y «publicado» (n8n, según su versión). Comprobarlos a mano.
+- **Guion y D30**: el 9/3 de la demo 2 no mide pasajeros que suben. Entrada = alejarse del tren (dx > 0). Si el guion lo interpreta, que sea así, sin hablar de embarque.

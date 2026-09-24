@@ -19,11 +19,17 @@ RETO_C = {"pooling": False, "epocas": 20}
 # ponytail: SEGUNDOS_POR_GMAC (celda 1.1) es una cota fija ~6× lo medido en local, no una medida de Colab; si en
 # Colab 1.3 bloquea por tiempo alguna solución que propone, subirla (ver g_construccion_nb1.md, correcciones).
 
+# Valores por defecto de 1.3 (los mismos que DEFECTO en la celda 1.1): se repiten en 1.3 y en 1.9 porque los
+# formularios de Colab no tienen botón de restablecer.
+RED_DEFECTO = ("`bloques_convolucionales` 2 · `filtros_primer_bloque` 16 · `duplicar_filtros_en_cada_bloque` ☑ · "
+               "`tamano_kernel` 3 · `usar_pooling` ☑ · `usar_batchnorm` ☐ · `dropout` 0,2 · `neuronas_capa_densa` 64 · "
+               "`compensar_desbalanceo` ☐ · `epocas` 8.")
+
 CELDAS = []
 
 
 def md(texto):
-    CELDAS.append(new_markdown_cell(textwrap.dedent(texto).strip()))
+    CELDAS.append(new_markdown_cell(textwrap.dedent(texto).strip().replace("__RED_DEFECTO__", RED_DEFECTO)))
 
 
 def codigo(titulo, fuente):
@@ -38,18 +44,19 @@ FALTA_PREPARACION = '''print("⚠️ Primero ejecuta la celda 1.1 · Preparació
 # 1.0 Portada
 # ---------------------------------------------------------------------------------------------
 md(r'''
-# Laboratorio 1 · Una CNN por dentro con radiografías de tórax
+# Cuaderno 1 · Una CNN por dentro con radiografías de tórax
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/<USUARIO>/<REPO>/blob/main/notebooks/01_laboratorio_cnn_radiografias.ipynb)
 
 Vas a diseñar una red neuronal convolucional (CNN) sin escribir código y a entrenarla para distinguir
 radiografías de tórax normales de radiografías con neumonía. Después verás qué ha aprendido cada capa
-y en qué zonas de la imagen se fija para decidir. Cada grupo prueba un cambio de arquitectura y
-compara sus resultados con los del resto de la clase.
+y en qué zonas de la imagen se fija para decidir. Cada uno prueba un cambio de arquitectura y compara
+sus resultados con los del resto de la clase en una hoja común.
 
 > ⚠️ **No apto para uso clínico.** PneumoniaMNIST es un conjunto educativo: radiografías de tórax de niños
 > reducidas a 28×28 o 64×64 píxeles. Sus autores advierten que a esa resolución se pierde información
-> necesaria para diagnosticar. Nada de lo que hagamos aquí sirve para diagnosticar a nadie.
+> necesaria para diagnosticar. Nada de lo que hagamos aquí sirve para diagnosticar a nadie. Son
+> radiografías reales, publicadas por sus autores con licencia abierta (CC BY 4.0).
 
 **Cómo se usa.** El código está oculto: cada celda se ve como un título con un botón ▶ y, debajo, sus controles.
 Algo así:
@@ -62,17 +69,19 @@ Algo así:
 ```
 
 Cambia los controles (deslizador, casilla, desplegable o texto) y pulsa ▶: el resultado aparece debajo.
-Ejecuta las celdas en orden, de arriba abajo. Si a una celda le falta un paso anterior, te dirá cuál.
+Si al pulsar ▶ por primera vez Colab te avisa de que este cuaderno no lo ha creado Google, es normal:
+pulsa **Ejecutar de todos modos**. Tarda unos segundos en conectarse.
+Ejecuta las celdas en orden, de arriba abajo, hasta la 1.9. Si a una celda le falta un paso anterior, te dirá cuál.
 
 **Índice**
 1.1 Preparación · 1.2 Los datos · 1.3 Diseña tu red · 1.4 Entrena · 1.5 Evalúa en test ·
 1.6 Qué ve cada capa · 1.7 Dónde mira el modelo (Grad-CAM) · 1.8 Registro de experimentos ·
-1.9 Retos guiados · 1.10 Plan B del profesor · 1.11 Cierre
+1.9 Retos guiados · 1.10 Plan B (solo el profesor) · 1.11 Cierre
 
 <small>Datos: PneumoniaMNIST (MedMNIST v2; Yang et al., *Scientific Data* 10, 41, 2023,
 doi:10.1038/s41597-022-01721-8), derivado de Kermany et al. (*Cell* 172(5), 2018). Licencia
-[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Cambios: los píxeles se dividen entre 255 para
-dejarlos entre 0 y 1; las imágenes no se modifican.</small>
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Cambios: solo se pasa el brillo de cada píxel de
+la escala 0-255 a la escala 0-1; no se recorta ni se retoca ninguna imagen.</small>
 ''')
 
 # ---------------------------------------------------------------------------------------------
@@ -81,7 +90,7 @@ dejarlos entre 0 y 1; las imágenes no se modifican.</small>
 md(r'''
 ## 1.1 Preparación
 Instala lo que falte (la primera vez tarda algo más), carga las librerías y fija la semilla
-aleatoria en 42 para que los resultados se puedan repetir.
+aleatoria en 42 para que, en el mismo entorno, repetir un entrenamiento dé lo mismo.
 ''')
 
 codigo("1.1 Preparación", r'''
@@ -185,6 +194,7 @@ COLUMNAS = ["id", "experimento", "reto", "hipotesis", "resolucion", "bloques", "
             "tiempo_entrenamiento_s", "acc_validacion", "accuracy", "sensibilidad", "especificidad", "auc",
             "diagnostico"]
 PASOS = {"datos": "1.2 · Los datos", "config": "1.3 · Diseña tu red", "modelo": "1.4 · Entrena la red"}
+DONDE = "en la máquina de Colab" if EN_COLAB else "en este ordenador"   # los tiempos se miden donde corre la red
 
 
 # --- Formato español de números ---
@@ -197,10 +207,26 @@ def pct(x, decimales=1):
     return num(100 * x, decimales) + " %"
 
 
+def duracion(segundos):
+    return f"{num(segundos)} s" if segundos < 120 else f"{num(segundos / 60)} minutos"
+
+
+def respuesta(p):
+    """Clase que dice la red y la probabilidad que le da a esa respuesta («> 99 %» mejor que un «100 %» redondeado)."""
+    pred = int(p >= 0.5)
+    q = p if pred else 1 - p
+    return CLASES[pred], "> 99 %" if q >= 0.995 else pct(q, 0)
+
+
+def _millones(v):
+    n = f"{v / 1e6:g}".replace(".", ",")
+    return f"{n} millón" if v == 1e6 else f"{n} millones"
+
+
 FORMATO_PCT = FuncFormatter(lambda v, _: num(100 * v, 1).rstrip("0").rstrip(",") + " %") if _listo else None
 FORMATO_DEC = FuncFormatter(lambda v, _: f"{v:g}".replace(".", ",")) if _listo else None
-FORMATO_PARAM = FuncFormatter(lambda v, _: (f"{v / 1e6:g} M" if v >= 1e6 else f"{v / 1e3:g} mil" if v >= 1e3
-                                            else f"{v:g}").replace(".", ",")) if _listo else None
+FORMATO_PARAM = FuncFormatter(lambda v, _: _millones(v) if v >= 1e6 else f"{v / 1e3:g} mil".replace(".", ",")
+                              if v >= 1e3 else f"{v:g}".replace(".", ",")) if _listo else None
 
 
 def png(fig):
@@ -229,18 +255,41 @@ def requiere(*claves):
 
 
 def modelo_listo():
-    if not requiere("datos", "modelo"):
+    """Hay una red entrenada que sirve con los datos cargados. Dice de qué experimento es y si 1.3 ha cambiado."""
+    if not requiere("datos"):
         return False
-    r = ESTADO["entreno"]["config"]["resolucion"]
+    if ESTADO["modelo"] is None:
+        if ESTADO["config_invalida"]:
+            error("Todavía no hay ninguna red entrenada y la configuración de la celda 1.3 no es válida: corrígela "
+                  "como dice el mensaje de 1.3 y ejecuta 1.3 y 1.4.")
+        else:
+            error(f"Primero ejecuta la celda <b>{PASOS['modelo']}</b>.")
+        return False
+    entreno = ESTADO["entreno"]
+    r = entreno["config"]["resolucion"]
     if r != ESTADO["resolucion"]:
         error(f"Tu red se entrenó con imágenes de {r}×{r} px, pero en 1.2 has cargado las de "
               f"{ESTADO['resolucion']}×{ESTADO['resolucion']} px. Vuelve a ejecutar 1.3 y 1.4, "
               f"o pon la resolución a {r} en la celda 1.2.")
         return False
+    nota(f"Resultados del experimento n.º {entreno['id']} («{html.escape(entreno['nombre'])}»).")
+    if ESTADO["config_invalida"]:
+        aviso(f"La configuración actual de 1.3 no se puede entrenar: lo que ves es la red n.º {entreno['id']}, la "
+              "última que entrenaste. Corrige 1.3 y ejecuta 1.3 y 1.4 para ver la nueva.")
+    elif ESTADO["red_actual"] and ESTADO["red_actual"][0] != diseno(entreno["config"])[1]:
+        aviso(f"Has cambiado la red en 1.3 pero aún no la has entrenado: lo que ves es la red n.º {entreno['id']}. "
+              "Ejecuta 1.4 para ver la nueva.")
     return True
 
 
 # --- La red ---
+def diseno(c):
+    """(arquitectura, diseño completo). El diseño añade lo que no cambia la red pero sí el entrenamiento."""
+    arquitectura = tuple(c[x] for x in ("resolucion", "bloques", "filtros", "duplicar", "kernel", "pooling",
+                                        "batchnorm", "dropout", "densa"))
+    return arquitectura, arquitectura + (c["compensar"], c["epocas"])
+
+
 def tamanos(res, bloques, kernel, pooling):
     """Lado de la imagen tras cada bloque. Devuelve (trayectoria, bloque donde se queda en 0×0 o None)."""
     lado, trayectoria = res, []
@@ -324,8 +373,9 @@ def entrenar(cfg, callbacks=()):
 REGLAS = (f"<b>Reglas del diagnóstico:</b> <i>colapso</i> si en validación dice casi siempre lo mismo (en el "
           f"{pct(UMBRAL_COLAPSO, 0)} de los casos o más) · <i>sobreajuste</i> si la pérdida de validación acaba un "
           f"{pct(UMBRAL_SUBIDA, 0)} o más por encima de su mínimo (y ese mínimo quedó 3 épocas o más antes del "
-          f"final) o si acaba siendo {num(UMBRAL_SEPARACION, 1)} veces la de entrenamiento o más · "
-          f"<i>infraajuste</i> si el acierto no llega al {pct(UMBRAL_INFRA, 0)} ni en entrenamiento ni en "
+          f"final) o si acaba siendo {num(UMBRAL_SEPARACION, 1)} veces la de entrenamiento o más (la de "
+          "entrenamiento es la media de cada época, con el dropout activo: con dropout, las curvas parecen algo más "
+          f"juntas) · <i>infraajuste</i> si el acierto no llega al {pct(UMBRAL_INFRA, 0)} ni en entrenamiento ni en "
           f"validación · si no, <i>razonable</i>.")
 
 
@@ -517,13 +567,14 @@ def mostrar_experimentos(filas):
         ax.set_xlim(min(xs) / 2, max(xs) * 6)
         ax.set_ylim(min(ys) - 0.08, 1.015)
         ax.set_title(titulo)
-        ax.set_xlabel("Parámetros de la red (escala logarítmica)")
+        ax.set_xlabel("Parámetros de la red\n(cada marca vale 10 veces más que la anterior)")
         ax.xaxis.set_major_formatter(FORMATO_PARAM)
         ax.xaxis.set_minor_formatter(NullFormatter())
         ax.yaxis.set_major_formatter(FORMATO_PCT)
     axs[0].axhline(1.0, color=BERMELLON, ls="--", lw=2, label="Siempre «Neumonía»: 100 %")
     axs[0].legend(loc="lower left")
-    axs[1].text(0.02, 0.03, "Siempre «Neumonía»: 0 %", transform=axs[1].transAxes, color=BERMELLON, fontsize=12)
+    axs[1].text(0.02, 0.03, "Siempre «Neumonía»: 0 % (muy por debajo, fuera del gráfico)", transform=axs[1].transAxes,
+                color=BERMELLON, fontsize=12)
     fig.tight_layout()
     for ax, clave in ((axs[0], "sensibilidad"), (axs[1], "especificidad")):
         _etiquetar(ax, xs, [f[clave] for f in con_test], [f["id"] for f in con_test])
@@ -533,7 +584,8 @@ def mostrar_experimentos(filas):
          "Responder siempre «Neumonía» da un 100 % de sensibilidad y un 0 % de especificidad: hacen falta las dos.")
     nota("Ojo: cada fila es un solo entrenamiento con la semilla 42. Con otra semilla las cifras cambian (en nuestras "
          "pruebas, la especificidad de la red por defecto se movió más de 15 puntos solo por eso), así que una "
-         "diferencia de pocos puntos entre dos experimentos puede ser azar: léela como una tendencia.")
+         "diferencia de pocos puntos puede ser azar: no saques conclusiones de ella. Fíjate solo en las diferencias "
+         "grandes.")
 
 
 # --- Arranque ---
@@ -555,24 +607,13 @@ if _listo:
                   "red_actual": None, "red_anterior": None, "modelo": None, "entreno": None,
                   "contador": 0, "experimentos": [], "reto": "", "hipotesis": "", "aleatoria": 0}
 
-    def _cpu():
-        try:
-            with open("/proc/cpuinfo") as f:
-                for linea in f:
-                    if linea.startswith("model name"):
-                        return linea.split(":", 1)[1].strip()
-        except OSError:
-            pass
-        return platform.machine()
-
+    nota('<span style="font-size:14px">Versiones instaladas (por si algo falla; no hace falta que las mires).</span>')
     tabla_html(pd.DataFrame([{"Python": platform.python_version(), "TensorFlow": tf.__version__,
                               "Keras": keras.__version__, "NumPy": np.__version__, "pandas": pd.__version__,
                               "scikit-learn": sklearn.__version__, "matplotlib": matplotlib.__version__,
                               "medmnist": medmnist.__version__}]))
     gpu = tf.config.list_physical_devices("GPU")
-    ok(f"Todo listo. Entorno: {'Google Colab' if EN_COLAB else 'Jupyter local'} · Procesador: {html.escape(_cpu())} "
-       f"({os.cpu_count()} núcleos) · GPU: {'sí, se usará' if gpu else 'no (todo funciona en CPU)'} · "
-       f"Semilla: {SEMILLA}.")
+    ok(f"Todo listo. Tarjeta gráfica (GPU): {'sí, se usará' if gpu else 'no, y no hace falta'} · Semilla: {SEMILLA}.")
     if ya_habia and ESTADO["experimentos"]:
         nota(f"Se conserva el registro de esta sesión ({len(ESTADO['experimentos'])} experimentos).")
 ''')
@@ -671,8 +712,9 @@ def _cargar_datos(res):
     (xtr, ytr), (xva, yva), (xte, yte) = (ESTADO["datos"][p] for p in ("train", "val", "test"))
     ok(f"Datos listos a {res}×{res} px: {num(len(ytr))} radiografías de entrenamiento, {num(len(yva))} de "
        f"validación y {num(len(yte))} de test.")
-    nota("<b>Entrenamiento</b>: las imágenes con las que aprende la red. <b>Validación</b>: sirven para vigilar "
-         "el entrenamiento. <b>Test</b>: el examen final, con imágenes que la red no ve mientras aprende.")
+    nota("<b>Entrenamiento</b>: las imágenes con las que aprende la red. <b>Validación</b>: imágenes que la red no "
+         "usa para aprender; sirven para comprobar, mientras entrena, si aprende de verdad o solo memoriza. "
+         "<b>Test</b>: el examen final, con imágenes que la red no ve mientras aprende.")
     if ESTADO["config"] and ESTADO["config"]["resolucion"] != res:
         aviso(f"Has cambiado la resolución: vuelve a ejecutar 1.3 y 1.4 para diseñar y entrenar la red con "
               f"imágenes de {res}×{res} px.")
@@ -704,7 +746,7 @@ def _cargar_datos(res):
     ax.set_ylabel("Radiografías")
     ax.set_ylim(0, len(ytr) * 0.85)
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: num(v)))
-    ax.set_title("Reparto de clases en cada conjunto")
+    ax.set_title("Normales y neumonías en cada conjunto")
     ax.legend()
     fig.tight_layout()
     mostrar(fig)
@@ -737,14 +779,16 @@ de lado (28 → 26).
 | `bloques_convolucionales` | Cuántos bloques se apilan. Cada bloque: convolución + ReLU (deja a cero los valores negativos) + pooling si está activado. |
 | `filtros_primer_bloque` | Filtros del primer bloque. Un filtro es un pequeño detector de patrones que recorre la imagen. |
 | `duplicar_filtros_en_cada_bloque` | Si cada bloque tiene el doble de filtros que el anterior. |
-| `tamano_kernel` | Tamaño de cada filtro: 3×3 o 5×5 píxeles. |
+| `tamano_kernel` | Lado de cada filtro (el «kernel» de CNN Explainer): 3 (3×3 píxeles) o 5 (5×5). |
 | `usar_pooling` | Pooling máx. 2×2: se queda con el valor más alto de cada cuadro de 2×2 y deja la imagen a la mitad de lado. |
-| `usar_batchnorm` | Normalización por lotes: reajusta la escala de las activaciones; suele estabilizar el entrenamiento. |
-| `dropout` | Fracción de neuronas que se apagan al azar mientras entrena, para que memorice menos. |
-| `neuronas_capa_densa` | Neuronas de la capa densa del final (0 = sin capa densa). |
-| `compensar_desbalanceo` | Da más peso a las radiografías normales, que son minoría. |
+| `usar_batchnorm` | Normalización por lotes: dentro de cada bloque, vuelve a poner los números en una escala parecida antes de pasar a la ReLU. Suele hacer el entrenamiento más estable. |
+| `dropout` | Parte de las neuronas que se apagan al azar mientras la red entrena, para que memorice menos (0,2 = el 20 %; en el deslizador sale 0.2). |
+| `neuronas_capa_densa` | Capa densa: neuronas que miran a la vez todo lo que sale de los bloques y lo combinan para decidir. Aquí eliges cuántas (0 = ninguna). |
+| `compensar_desbalanceo` | Al entrenar, equivocarse con una radiografía normal cuenta unas 3 veces más que equivocarse con una neumonía, porque hay muchas menos normales. |
 | `epocas` | Época = una pasada completa por las 4.708 imágenes de entrenamiento. |
-| `nombre_experimento` | Nombre con el que se guarda en el registro: pon el de tu grupo. |
+| `nombre_experimento` | Tus iniciales y tu reto (p. ej. «ALM_A»): así se ve en la hoja común. |
+
+**Red por defecto:** __RED_DEFECTO__
 
 Un **parámetro** es un número que la red ajusta al entrenar (los pesos de filtros y neuronas).
 ''')
@@ -891,12 +935,13 @@ def _disenar(cfg):
     mostrar(_diagrama(modelo, res))
     tabla_html(pd.DataFrame([{"Capa": c.name, "Tipo": _tipo_capa(c), "Forma de salida": _forma(c),
                               "Parámetros": num(c.count_params())} for c in modelo.layers]))
+    nota('<span style="font-size:14px"><b>Forma de salida</b> = alto × ancho × número de mapas (uno por filtro). '
+         "«Aplanar» pone todos esos números en una sola fila. La última neurona da una puntuación (logit) y la "
+         "sigmoide la convierte en una probabilidad de neumonía entre 0 y 1.</span>")
 
-    arquitectura = tuple(cfg[x] for x in ("resolucion", "bloques", "filtros", "duplicar", "kernel", "pooling",
-                                          "batchnorm", "dropout", "densa"))
-    diseno = arquitectura + (cfg["compensar"], cfg["epocas"])   # re-ejecutar lo mismo no cambia la comparación
-    if ESTADO["red_actual"] is None or ESTADO["red_actual"][0] != diseno:
-        ESTADO["red_anterior"], ESTADO["red_actual"] = ESTADO["red_actual"], (diseno, arquitectura, parametros)
+    arquitectura, completo = diseno(cfg)   # re-ejecutar lo mismo no cambia la comparación
+    if ESTADO["red_actual"] is None or ESTADO["red_actual"][0] != completo:
+        ESTADO["red_anterior"], ESTADO["red_actual"] = ESTADO["red_actual"], (completo, arquitectura, parametros)
     anterior = ESTADO["red_anterior"]
     if anterior is None:
         comparacion = "Primera red de la sesión."
@@ -917,22 +962,25 @@ def _disenar(cfg):
               "Colab tardaría del orden de una hora en entrenar. Activa el pooling, baja la resolución a 28 o usa "
               "menos filtros o neuronas.")
         return
-    estado = display(HTML("⏱️ Midiendo cuánto tarda un lote de imágenes en este ordenador…"), display_id=True)
+    estado = display(HTML(f"⏱️ Midiendo cuánto tarda un lote de imágenes {DONDE}…"), display_id=True)
     segundos = segundos_estimados(medir_lotes(modelo), cfg["epocas"])
-    minutos = f" (unos {num(segundos / 60)} minutos)" if segundos > AVISO_SEGUNDOS else ""
-    estado.update(HTML(f'<div style="font-size:15px">⏱️ Tiempo estimado de entrenamiento en este ordenador: '
-                       f'<b>~{num(segundos)} s</b>{minutos}</div>'))
+    minutos = f" (unos {num(segundos / 60)} minutos)" if segundos >= 120 else ""
+    estado.update(HTML(f'<div style="font-size:15px">⏱️ Tiempo estimado de entrenamiento {DONDE}: '
+                       f'<b>~{num(segundos)} s</b>{minutos}, sin contar el dibujo de las curvas</div>'))
     if segundos > MAX_SEGUNDOS:
-        error(f"Unos {num(segundos / 60)} minutos de entrenamiento no caben en el laboratorio. Activa el pooling, "
-              "baja la resolución a 28 o usa menos filtros o neuronas.")
+        arreglos = (["activa el pooling"] if not cfg["pooling"] else []) + \
+                   (["baja la resolución a 28 en la celda 1.2"] if res != 28 else []) + \
+                   [f"baja las épocas (ahora {cfg['epocas']})", "usa menos filtros o neuronas"]
+        error(f"Unos {num(segundos / 60)} minutos de entrenamiento no caben en el laboratorio. Soluciones: "
+              f"{', '.join(arreglos[:-1])} o {arreglos[-1]}.")
         return
     if segundos > AVISO_SEGUNDOS:
-        aviso(f"Esta red tardará unos {num(segundos / 60)} minutos en entrenar. Puedes seguir, pero quizá prefieras "
-              "una más pequeña.")
+        aviso(f"Esta red tardará unos {duracion(segundos)} en entrenar. Puedes seguir, pero quizá prefieras una más "
+              "pequeña.")
     lado = modelo.get_layer(f"relu_{b}").output.shape[1]
     if lado <= 3:
-        aviso(f"El último mapa de activación mide {lado}×{lado} px: el mapa de Grad-CAM (1.7) será muy grueso y "
-              "apenas señalará zonas.")
+        aviso(f"El último mapa de activación mide {lado}×{lado} px: el mapa de Grad-CAM (1.7) tendrá solo "
+              f"{lado}×{lado} cuadros y apenas señalará zonas.")
     ESTADO["config"], ESTADO["config_invalida"] = cfg, False
     ok("Red lista. Ahora ejecuta <b>1.4 · Entrena la red</b>.")
 
@@ -957,7 +1005,8 @@ La red ve las imágenes de entrenamiento en lotes de 128 y ajusta sus parámetro
 **pérdida** (el error medio de sus probabilidades: cuanto más baja, mejor). Al final de cada época se
 mide también en **validación**, con imágenes que no usa para aprender. Cada vez que ejecutas esta celda
 la red empieza desde cero, con la misma semilla. Al final verás un diagnóstico: **sobreajuste** = memoriza
-las imágenes de entrenamiento y generaliza peor; **infraajuste** = aún no ha aprendido lo suficiente.
+las imágenes de entrenamiento y falla más con radiografías nuevas; **infraajuste** = aún no ha aprendido lo
+suficiente; **colapso** = responde siempre lo mismo.
 ''')
 
 codigo("1.4 Entrena la red", r'''
@@ -1010,8 +1059,9 @@ def _entrenar_red():
             self.axs[1].yaxis.set_major_formatter(FORMATO_PCT)
             self.fig.tight_layout()
 
+    curvas = CurvasEnVivo()
     try:
-        modelo, historial, segundos = entrenar(cfg, [CurvasEnVivo()])
+        modelo, historial, _ = entrenar(cfg, [curvas])
     except KeyboardInterrupt:
         plt.close("all")
         aviso("Has detenido el entrenamiento. Vuelve a ejecutar la celda cuando quieras.")
@@ -1023,6 +1073,7 @@ def _entrenar_red():
               f"<br><small>Detalle técnico: {html.escape(str(e)[:300])}</small>")
         return
     plt.close("all")
+    segundos = sum(curvas.tiempos)   # sin el dibujo de las curvas: comparable con el Plan B, que no las dibuja
 
     etiqueta, explicacion, cifras = diagnosticar(modelo, historial)
     ESTADO["contador"] += 1
@@ -1035,9 +1086,12 @@ def _entrenar_red():
        f"Queda anotado como experimento n.º {entreno['id']} («{html.escape(cfg['nombre'])}»).")
     recuadro = {"colapso": error, "sobreajuste": aviso, "infraajuste": aviso}.get(etiqueta, info)
     recuadro(f"<b>Diagnóstico: {etiqueta}.</b> {explicacion}")
-    nota(f'<span style="font-size:14px">{cifras}<br>{REGLAS}</span>')
-    nota("Fíjate: al principio el acierto de validación puede ir por encima del de entrenamiento. Es normal: el "
-         "dropout solo actúa al entrenar y la cifra de entrenamiento es la media de toda la época.")
+    nota(f'<span style="font-size:14px">{REGLAS}</span>')
+    nota(f'<details style="font-size:14px"><summary>Cifras de este entrenamiento</summary>{cifras}</details>')
+    nota("Fíjate: el acierto de validación puede ir por encima del de entrenamiento (con la red por defecto suele "
+         "pasar en todas las épocas). Es normal: el dropout solo actúa al entrenar y la cifra de entrenamiento es la "
+         "media de toda la época" + ("; además, al compensar, en la de entrenamiento las normales pesan más."
+                                    if cfg["compensar"] else "."))
     nota("Siguiente paso: <b>1.5 · Evalúa en test</b>.")
 
 
@@ -1054,6 +1108,9 @@ md(r'''
 ## 1.5 Evalúa en test
 El test son 624 radiografías que la red no ha visto nunca. Umbral 0,5: si la probabilidad de neumonía
 es 0,5 o más, la red dice «Neumonía».
+
+*Nota de rigor: en un proyecto real la configuración se elige mirando solo validación y el test se mira una
+vez, al final. Aquí lo miramos en cada prueba para aprender.*
 ''')
 
 codigo("1.5 Evalúa en test", r'''
@@ -1069,7 +1126,8 @@ def _evaluar_test():
     tarjetas = [("Acierto (test)", pct(m["accuracy"]), "aciertos sobre el total"),
                 ("Sensibilidad", pct(m["sensibilidad"]), "de las neumonías, cuántas detecta"),
                 ("Especificidad", pct(m["especificidad"]), "de las normales, cuántas deja tranquilas"),
-                ("AUC", num(m["auc"], 3), "ordena de más a menos probable: 0,5 = azar, 1 = perfecto")]
+                ("AUC", num(m["auc"], 3), "elegidas al azar una neumonía y una normal, probabilidad de que la red "
+                                           "puntúe más alto la neumonía (0,5 = azar, 1 = perfecto)")]
     display(HTML('<div style="display:flex; flex-wrap:wrap; gap:10px; margin:8px 0">' + "".join(
         f'<div style="border:2px solid #0072B2; border-radius:8px; padding:8px 14px; min-width:170px; color:inherit">'
         f'<div style="font-size:14px">{t}</div><div style="font-size:28px; font-weight:bold">{v}</div>'
@@ -1110,19 +1168,25 @@ def _evaluar_test():
     diferencia = m["accuracy"] - referencia
     nota(f"Tu red acierta el <b>{pct(m['accuracy'])}</b> en test; responder siempre «Neumonía» acierta el "
          f"{pct(referencia)} ({'+' if diferencia >= 0 else '−'}{num(abs(diferencia) * 100, 1)} puntos).")
-    info("<b>¿Por qué importa tanto la sensibilidad?</b> En un cribado, dejar pasar una neumonía (falso negativo) "
-         "suele salir más caro que una falsa alarma (falso positivo): el paciente se va a casa sin tratamiento, y la "
-         "falsa alarma se aclara con otra prueba. Por eso en cribado se suele priorizar la sensibilidad, aceptando "
-         "más falsas alarmas. El equilibrio lo decide el equipo clínico según el contexto, no el modelo.")
+    info("<b>¿Por qué importa tanto la sensibilidad?</b> En un cribado, una neumonía que se escapa (falso negativo) "
+         "suele ser peor que una falsa alarma (falso positivo), que se aclara con otra prueba. Por eso se suele "
+         "priorizar la sensibilidad. El equilibrio lo decide el equipo clínico según el contexto, no el modelo.")
     acc_val = entreno["historial"]["val_accuracy"][-1]
     if acc_val - m["accuracy"] > 0.05:
+        pred_val = probabilidades(ESTADO["modelo"], ESTADO["datos"]["val"][0]) >= 0.5
+        recall_val = {c: float((pred_val[yva == c] == c).mean()) for c in (0, 1)}
+        recall_test = {0: m["especificidad"], 1: m["sensibilidad"]}
+        c = max((0, 1), key=lambda c: recall_val[c] - recall_test[c])   # la clase en la que más empeora
+        motivo = (f", y la red falla más con sus radiografías {('normales', 'con neumonía')[c]} "
+                  f"({('especificidad', 'sensibilidad')[c]} del {pct(recall_val[c])} en validación frente al "
+                  f"{pct(recall_test[c])} en test)") if recall_val[c] - recall_test[c] > 0.02 else ""
         nota(f"En validación acertaba el {pct(acc_val)} y en test el {pct(m['accuracy'])}. No tiene por qué ser "
-             "sobreajuste: el test viene de otro conjunto (el de validación del estudio original) y tiene menos "
-             f"neumonías ({pct(yte.mean())} frente a {pct(yva.mean())}).")
-    nota("<i>Nota de rigor: en un proyecto real la configuración se elige mirando solo validación y el test se mira "
-         "una vez, al final. Aquí lo miramos en cada prueba para aprender.</i>")
+             f"sobreajuste: el test sale de otro lote de radiografías, con menos neumonías ({pct(yte.mean())} frente "
+             f"a {pct(yva.mean())}){motivo}. La validación sale del mismo lote que el entrenamiento y puede ser algo "
+             "optimista.")
     if registrar(entreno, m):
         ok(f"Resultados anotados en el registro de experimentos (1.8) como n.º {entreno['id']}.")
+    nota("Siguiente paso: <b>1.6</b>. Si estás haciendo un reto, ejecuta también <b>1.8</b> y copia tu línea.")
 
 
 if "ESTADO" not in globals():
@@ -1138,6 +1202,10 @@ md(r'''
 ## 1.6 Qué ve cada capa
 Elige una radiografía del test. Verás los filtros que ha aprendido la primera capa y los **mapas de
 activación** (feature maps) de cada bloque: dónde responde cada filtro dentro de la imagen.
+
+Con «Neumonía aleatoria» o «Normal aleatoria» sale otra radiografía cada vez. Para volver a una concreta,
+elige «Índice concreto» y escribe en `indice_imagen` su número (de 0 a 623: es el «Test n.º» del título).
+Con las opciones aleatorias ese número no se usa.
 ''')
 
 codigo("1.6 Qué ve cada capa", r'''
@@ -1165,8 +1233,7 @@ def _que_ve(opcion, indice):
         error("Elige una opción del desplegable «imagen_a_analizar» y vuelve a ejecutar la celda.")
         return
     x = xte[i:i + 1]
-    p = float(probabilidades(modelo, x)[0])
-    pred = int(p >= 0.5)
+    clase, prob = respuesta(float(probabilidades(modelo, x)[0]))
 
     # Imagen ampliada + filtros de la primera convolución
     pesos = modelo.get_layer("conv_1").get_weights()[0]   # (k, k, 1, filtros)
@@ -1177,8 +1244,7 @@ def _que_ve(opcion, indice):
     ax = izquierda.subplots()
     ax.imshow(x[0, ..., 0], cmap="gray", vmin=0, vmax=1, interpolation="nearest")
     ax.axis("off")
-    ax.set_title(f"Test n.º {i}\nReal: {CLASES[int(yte[i])]} · Predicción: {CLASES[pred]} "
-                 f"({pct(p if pred else 1 - p, 0)})", fontsize=14)
+    ax.set_title(f"Test n.º {i} · Real: {CLASES[int(yte[i])]}\nPredicción: {clase} · {prob}", fontsize=14)
     axs = np.atleast_1d(derecha.subplots(filas_filtros, 8)).ravel()
     tope = float(np.abs(pesos).max()) or 1.0   # escala común y simétrica: gris medio = 0 en todos los filtros
     for j, a in enumerate(axs):
@@ -1187,9 +1253,9 @@ def _que_ve(opcion, indice):
             a.imshow(pesos[:, :, 0, j], cmap="gray", vmin=-tope, vmax=tope, interpolation="nearest")
     derecha.suptitle(f"Los {n_filtros} filtros de la primera capa ({k}×{k} píxeles cada uno)", fontsize=14)
     mostrar(fig)
-    nota(f"Cada filtro es una plantilla de {k}×{k} pesos aprendidos que recorre toda la imagen (claro = peso positivo, "
-         "oscuro = negativo, gris medio = cero; la escala es la misma para todos). Algunos se parecen a detectores "
-         "de bordes o de cambios de brillo.")
+    nota(f"Cada filtro es una cuadrícula de {k}×{k} números aprendidos (pesos) que recorre toda la imagen (claro = peso "
+         "positivo, oscuro = negativo, gris medio = cero; la escala es la misma para todos). Algunos se parecen a "
+         "detectores de bordes o de cambios de brillo.")
 
     # Mapas de activación (salida de cada ReLU), los 8 más activos por bloque
     relus = [c.name for c in modelo.layers if c.name.startswith("relu_")]
@@ -1202,8 +1268,9 @@ def _que_ve(opcion, indice):
     for b, (sub, mapa) in enumerate(zip(np.atleast_1d(fig.subfigures(n_bloques, 1)), mapas), start=1):
         a = mapa.numpy()[0]
         orden = np.argsort(a.mean(axis=(0, 1)))[::-1][:8]
-        tendencia = ("detalle fino: brillo, bordes y contrastes" if b == 1 else "zonas más amplias y patrones más "
-                     "abstractos" if b == n_bloques else "combinaciones de bordes: texturas y formas")
+        tendencia = ("detalle fino: brillo, bordes y contrastes" if b == 1 else "zonas más amplias (en esta red "
+                     "pequeña, muchos filtros responden sobre todo al brillo)" if b == n_bloques else
+                     "combinaciones de bordes: texturas y formas")
         sub.suptitle(f"Bloque {b} · {a.shape[0]}×{a.shape[1]} px · {tendencia}", fontsize=14, x=0.01, ha="left")
         for ax, canal in zip(sub.subplots(1, 8), list(orden) + [None] * 8):
             ax.axis("off")
@@ -1211,9 +1278,9 @@ def _que_ve(opcion, indice):
                 ax.imshow(a[:, :, canal], cmap="viridis", vmin=0, vmax=float(a[:, :, canal].max()) or 1.0,
                           interpolation="nearest")   # morado = 0 de verdad; amarillo = el máximo de ese mapa
     mostrar(fig)
-    nota("Cada mapa muestra dónde responde un filtro: morado oscuro = nada (la ReLU deja a cero lo negativo) y "
-         "amarillo = donde más responde ese filtro. De cada bloque ves los 8 mapas que más se activan con esta "
-         "imagen. Los primeros bloques suelen marcar bordes y contrastes; los últimos, más pequeños, responden a "
+    nota("Cada mapa muestra dónde responde un filtro (de cada bloque, los 8 que más se activan con esta imagen): "
+         "morado = nada, amarillo = donde más responde. En una red tan pequeña, muchos mapas se parecen a la propia "
+         "radiografía, algo borrosa; en redes grandes, los primeros bloques suelen marcar bordes y los últimos, "
          "patrones más abstractos. Si varios mapas se parecen, esos filtros han aprendido cosas parecidas.")
     if opcion != "Índice concreto":
         nota("Cada vez que ejecutes la celda con una opción «aleatoria» saldrá otra radiografía.")
@@ -1230,10 +1297,9 @@ elif modelo_listo():
 # ---------------------------------------------------------------------------------------------
 md(r'''
 ## 1.7 Dónde mira el modelo (Grad-CAM)
-Grad-CAM usa los gradientes de la clase predicha que llegan a la última capa convolucional (cuánto
-cambiaría su puntuación si cambiara cada zona) para dibujar un mapa de calor aproximado de las zonas que
-más han empujado esa predicción (Selvaraju et al., 2017).
-Verás 3 aciertos y 3 fallos del test.
+Grad-CAM pinta encima de la radiografía un mapa de calor con las zonas que más han empujado a la red
+hacia su respuesta: amarillo = mucho, morado = poco. Es una aproximación, no una explicación completa
+(Selvaraju et al., 2017). Verás 3 aciertos y 3 fallos del test.
 ''')
 
 codigo("1.7 Dónde mira el modelo (Grad-CAM)", r'''
@@ -1275,30 +1341,51 @@ def _gradcam():
 
     aciertos = elegir([i for i in orden if pred[i] == y[i]])
     fallos = elegir([i for i in orden if pred[i] != y[i]])
+
+    # Cada casilla del mapa se pinta sobre el píxel en el que está centrada: sin relleno, la capa no llega a los
+    # bordes. centro = píxel del centro de la primera casilla; paso = píxeles entre casillas.
+    centro, paso = 0.0, 1.0
+    for c in modelo.layers:
+        if isinstance(c, layers.Conv2D):
+            centro += (c.kernel_size[0] - 1) / 2 * paso
+        elif isinstance(c, layers.MaxPooling2D):
+            centro, paso = centro + paso / 2, paso * 2
+        if c.name == capa:
+            break
+    a, b = centro - paso / 2, centro + paso * (lado - 1) + paso / 2
+    res = xte.shape[1]
+
     grupos = [("Aciertos", aciertos)] + ([("Fallos", fallos)] if fallos else [])
-    fig = plt.figure(figsize=(12.5, 4.7 * len(grupos)), layout="constrained")
+    fig = plt.figure(figsize=(13.5, 3.7 * len(grupos)), layout="constrained")
     for sub, (titulo, indices) in zip(np.atleast_1d(fig.subfigures(len(grupos), 1)), grupos):
         sub.suptitle(titulo, fontsize=16, fontweight="bold")
-        for ax, i in zip(sub.subplots(1, 3), list(indices) + [None] * 3):
-            ax.axis("off")
+        for par, i in zip(sub.subfigures(1, 3), list(indices) + [None] * 3):
+            axs = par.subplots(1, 2)
+            for ax in axs:
+                ax.axis("off")
             if i is None:
                 continue
-            clase = CLASES[pred[i]]
-            ax.imshow(xte[i, ..., 0], cmap="gray", vmin=0, vmax=1)
-            ax.set_title(f"Real: {CLASES[y[i]]}\nPredicho: {clase} · {pct(p[i] if pred[i] else 1 - p[i], 0)}",
-                         fontsize=14)
+            clase, prob = respuesta(p[i])
+            par.suptitle(f"Real: {CLASES[y[i]]}\nPredicción: {clase} · {prob}", fontsize=14)
+            for ax, rotulo in zip(axs, ("Radiografía", "Dónde miró")):
+                ax.imshow(xte[i, ..., 0], cmap="gray", vmin=0, vmax=1)
+                ax.set_title(rotulo, fontsize=12)
             if vacio[i]:
-                ax.text(0.5, 0.5, f"Grad-CAM no encuentra\nninguna zona que empuje\nhacia «{clase}»",
-                        transform=ax.transAxes, ha="center", va="center", fontsize=12,
-                        bbox=dict(facecolor="white", alpha=0.85, edgecolor="none"))
+                axs[1].text(0.5, 0.5, f"Grad-CAM no\nencuentra ninguna\nzona que empuje\nhacia «{clase}»",
+                            transform=axs[1].transAxes, ha="center", va="center", fontsize=11,
+                            bbox=dict(facecolor="white", alpha=0.85, edgecolor="none"))
             else:
-                ampliado = tf.image.resize((mapas[i] / maximos[i])[..., None], xte.shape[1:3], method="bilinear")
-                ax.imshow(ampliado.numpy()[..., 0], cmap="viridis", alpha=0.45, vmin=0, vmax=1)
+                axs[1].imshow(mapas[i] / maximos[i], cmap="viridis", alpha=0.45, vmin=0, vmax=1,
+                              extent=(a, b, b, a), interpolation="bilinear")
+                axs[1].set_xlim(-0.5, res - 0.5)
+                axs[1].set_ylim(res - 0.5, -0.5)
     mostrar(fig)
-    res = xte.shape[1]
     info(f"El color indica en qué zonas se ha fijado la red para esta predicción: amarillo = mucho, morado = poco. "
-         f"Es un mapa aproximado: sale de la capa <b>{capa}</b>, de {lado}×{lado} px, ampliada a {res}×{res}. Enseña "
-         "dónde miró, no por qué acertó o falló; en radiografías reales estos mapas localizan peor que un radiólogo.")
+         f"Es un mapa aproximado: sale de la capa <b>{capa}</b>, de {lado}×{lado} px, ampliada a {res}×{res} (el "
+         "marco sin color es la zona que esa capa no cubre). "
+         "Enseña dónde miró, no por qué acertó o falló; en radiografías reales estos mapas localizan peor que un "
+         "radiólogo.")
+    nota("El porcentaje es la probabilidad que da la red a su respuesta; cerca del 50 % significa que duda.")
     if lado <= 3:
         aviso(f"Con una última capa de solo {lado}×{lado} px el mapa es tan grueso que apenas señala zonas.")
     if not fallos:
@@ -1318,9 +1405,10 @@ elif modelo_listo():
 
 md(r'''
 > 🗣️ **Para el debate: aprendizaje por atajos.** En 2018, Zech y colaboradores entrenaron CNN para detectar
-> neumonía en unas 158.000 radiografías de adultos de tres sistemas hospitalarios de EE. UU. Los modelos
-> rendían peor fuera del hospital en el que habían aprendido, y una CNN adivinaba de qué hospital venía cada
-> placa en más del 95 % de los casos, a veces fijándose en una marca metálica de la esquina. Como la proporción
+> neumonía en unas 158.000 radiografías de adultos de tres sistemas hospitalarios de EE. UU. En 3 de 5
+> comparaciones, los modelos rendían peor fuera del hospital en el que habían aprendido, y una CNN adivinaba
+> de qué hospital venía cada placa en más del 95 % de los casos, a veces fijándose en una marca metálica de
+> la esquina. Como la proporción
 > de neumonías cambiaba mucho entre hospitales, saber de dónde venía la placa ya ayudaba a acertar sin mirar el
 > pulmón. Un buen resultado en el test no garantiza que el modelo mire donde creemos.
 >
@@ -1365,28 +1453,34 @@ def _registro():
         return
     mostrar_experimentos(filas)
     ultima = filas[-1]
-    nota(f"<b>Línea para la tabla común de la clase</b> (experimento n.º {ultima['id']}, «{html.escape(ultima['experimento'])}»). "
-         "Selecciona las dos líneas, cópialas y pégalas en la hoja de cálculo: cada valor cae en su columna.")
+    nota(f"<b>Línea para la hoja común de la clase</b> (experimento n.º {ultima['id']}, "
+         f"«{html.escape(ultima['experimento'])}»). Copia solo la segunda línea y pégala en la primera fila libre de "
+         "la hoja común: cada valor cae en su columna. La primera son los nombres de las columnas, que ya están en "
+         "la hoja.")
     display(HTML('<pre style="font-size:13px; padding:8px; border:1px solid #8888; overflow-x:auto">'
                  + html.escape(_linea_resumen(ultima)) + "</pre>"))
     if ultima["accuracy"] is None:
         aviso("Este experimento aún no tiene métricas de test: ejecuta 1.5 y vuelve aquí.")
     if not guardar_csv():
         return
-    if EN_COLAB:
-        try:
-            from google.colab import files
-        except ImportError:
-            files = None
-        try:
-            files.download(RUTA_CSV)
-            ok(f"Descargando <code>experimentos.csv</code>. Si no se descarga, búscalo en el panel de archivos "
-               f"(a la izquierda), carpeta <code>{CARPETA_SALIDAS}</code>.")
-        except Exception:
-            aviso(f"No he podido lanzar la descarga. Búscalo en el panel de archivos (a la izquierda): "
-                  f"<code>{RUTA_CSV}</code>, menú ⋮ → Descargar.")
-    else:
-        ok(f"Tabla guardada en <code>{html.escape(os.path.abspath(RUTA_CSV))}</code> (se abre bien en Excel).")
+    que_es = "tu tabla con todos tus experimentos (se abre en Excel). Para la hoja común basta con la línea de arriba"
+    if not EN_COLAB:
+        ok(f"Tabla guardada en <code>{html.escape(os.path.abspath(RUTA_CSV))}</code>. Es {que_es}.")
+        return
+    firma = hash(repr(filas))   # solo se descarga si el registro ha cambiado desde la última descarga
+    if ESTADO.get("descargado") == firma:
+        nota(f"<code>experimentos.csv</code> es {que_es}. No ha cambiado desde la última descarga; también está en "
+             f"el panel de archivos (a la izquierda), carpeta <code>{CARPETA_SALIDAS}</code>.")
+        return
+    try:
+        from google.colab import files
+        files.download(RUTA_CSV)
+        ESTADO["descargado"] = firma
+        ok(f"Descargando <code>experimentos.csv</code>: {que_es}. Si no se descarga, búscalo en el panel de "
+           f"archivos (a la izquierda), carpeta <code>{CARPETA_SALIDAS}</code>.")
+    except Exception:
+        aviso(f"No he podido lanzar la descarga de <code>experimentos.csv</code>, {que_es}. Búscalo en el panel de "
+              f"archivos (a la izquierda): <code>{RUTA_CSV}</code>, menú ⋮ → Descargar.")
 
 
 if "ESTADO" not in globals():
@@ -1400,9 +1494,16 @@ else:
 # ---------------------------------------------------------------------------------------------
 md(r'''
 ## 1.9 Retos guiados
-Cada grupo hace el reto que le toque. Antes de entrenar, **escribe tu hipótesis** en la celda de abajo:
-¿qué crees que pasará? Después sube a 1.3, cambia lo que pide el reto y ejecuta 1.3, 1.4 y 1.5.
-Empieza cada reto desde la red por defecto.
+Cada uno trabaja en su portátil. El profesor dirá en clase qué reto te toca (A, B, C o D). En
+`nombre_experimento` (1.3) pon tus iniciales y el reto, por ejemplo «ALM_A». Antes de entrenar,
+**escribe tu hipótesis** en la celda de abajo: ¿qué crees que pasará?
+
+Para cada entrenamiento, cambia en 1.3 lo que pide el reto y ejecuta 1.3 → 1.4 → 1.5 → 1.8. En 1.8, copia
+tu línea en la hoja común (el enlace está en el chat de la clase). En los retos A y C entrenas dos veces,
+así que copias dos líneas.
+
+Empieza cada reto desde la red por defecto: __RED_DEFECTO__ Si has tocado algo, vuelve a estos valores
+antes de empezar.
 
 **A · Profundidad: 1 frente a 3 bloques.** En 1.3 pon `bloques_convolucionales` en 1 y entrena; luego en 3
 y entrena otra vez. Mira el número de parámetros de la ficha, el tamaño de los mapas en 1.6 y la
@@ -1411,9 +1512,9 @@ sensibilidad y la especificidad en 1.8.
 **B · Sin pooling.** En 1.3 desmarca `usar_pooling` y entrena. Compara con la red por defecto el número de
 parámetros, el tiempo de entrenamiento y las métricas.
 
-**C · Dropout 0 frente a 0,5 con 20 épocas.** En 1.3 desmarca `usar_pooling` y pon `epocas` en 20. Entrena
-con `dropout` en 0 y después en 0,5. Mira las curvas de pérdida en 1.4: ¿se separan la de entrenamiento y la
-de validación? ¿Qué dice el diagnóstico en cada caso?
+**C · Dropout 0 frente a 0,5 (sin pooling, 20 épocas).** En 1.3 desmarca `usar_pooling`, pon `epocas` en 20
+y entrena dos veces: con `dropout` en 0 y con `dropout` en 0,5 (en el deslizador sale 0.5). Mira las curvas
+de pérdida en 1.4: ¿se separan la de entrenamiento y la de validación? ¿Qué dice el diagnóstico en cada caso?
 
 **D · Compensar el desbalanceo.** En 1.3 marca `compensar_desbalanceo` y entrena. Compara la sensibilidad y la
 especificidad con las de la red por defecto.
@@ -1422,7 +1523,7 @@ especificidad con las de la red por defecto.
 ''')
 
 codigo("1.9 Elige tu reto y escribe tu hipótesis", r'''
-reto = "A · Profundidad (1 frente a 3 bloques)"  # @param ["A · Profundidad (1 frente a 3 bloques)", "B · Sin pooling", "C · Dropout 0 frente a 0,5", "D · Compensar el desbalanceo", "Libre"]
+reto = "A · Profundidad (1 frente a 3 bloques)"  # @param ["A · Profundidad (1 frente a 3 bloques)", "B · Sin pooling", "C · Dropout 0 frente a 0,5 (sin pooling, 20 épocas)", "D · Compensar el desbalanceo", "Libre"]
 hipotesis = ""  # @param {type:"string"}
 
 
@@ -1435,11 +1536,12 @@ def _guardar_reto(reto, hipotesis):
     ESTADO["reto"], ESTADO["hipotesis"] = letra, texto
     if texto:
         ok(f"Guardado: reto <b>{html.escape(str(reto))}</b>. Hipótesis: «{html.escape(texto)}». Se anotarán en los "
-           "experimentos que entrenes a partir de ahora.")
+           "experimentos que entrenes a partir de ahora. Comprueba que es el reto que te ha dado el profesor.")
     else:
-        aviso(f"Reto <b>{html.escape(str(reto))}</b> guardado, pero la hipótesis está vacía. Escribe qué crees que "
-              "pasará y vuelve a ejecutar esta celda antes de entrenar.")
-    nota("Ahora sube a <b>1.3</b>, cambia lo que pide el reto y ejecuta 1.3, 1.4 y 1.5.")
+        aviso(f"Reto <b>{html.escape(str(reto))}</b> guardado, pero la hipótesis está vacía. Comprueba que es el reto "
+              "que te ha dado el profesor, escribe qué crees que pasará y vuelve a ejecutar esta celda antes de "
+              "entrenar.")
+    nota("Ahora sube a <b>1.3</b>, cambia lo que pide el reto y ejecuta 1.3 → 1.4 → 1.5 → 1.8.")
 
 
 if "ESTADO" not in globals():
@@ -1452,13 +1554,14 @@ else:
 # 1.10 Plan B del profesor
 # ---------------------------------------------------------------------------------------------
 md(r'''
-## 1.10 Plan B del profesor (opcional)
-Entrena una detrás de otra las siete configuraciones de referencia de los retos (A y C comparan dos
-variantes; B y D se comparan con la red por defecto), las evalúa en test y las añade al registro.
-Con la casilla desmarcada solo muestra qué entrenaría y cuánto tardaría.
+## 1.10 Plan B (solo el profesor)
+**No ejecutes esta celda.** La usa el profesor si en clase no da tiempo a entrenar los retos: entrena una
+detrás de otra las siete configuraciones de referencia (A y C comparan dos variantes; B y D se comparan con
+la red por defecto), las evalúa en test y las añade al registro. Con la casilla desmarcada solo muestra qué
+entrenaría y cuánto tardaría.
 ''')
 
-codigo("1.10 Plan B del profesor", r'''
+codigo("1.10 Plan B (solo el profesor)", r'''
 ejecutar_plan_b = False  # @param {type:"boolean"}
 
 RETO_C = __RETO_C__
@@ -1487,12 +1590,12 @@ def _plan_b(ejecutar):
             segundos = segundos_estimados(medidas[arquitectura], cfg["epocas"])
             total += segundos
             filas.append({"Configuración": nombre, "Reto": reto_ref, "Cambios respecto a la red por defecto": cambios(cfg),
-                          "Parámetros": num(modelo.count_params()), "Tiempo estimado": f"~{num(segundos)} s"})
+                          "Tiempo estimado": f"~{num(segundos)} s"})
         estado.update(HTML(""))
         tabla_html(pd.DataFrame(filas))
         info(f"Marca <b>ejecutar_plan_b</b> y vuelve a ejecutar la celda para entrenar estas {len(filas)} redes una "
-             f"detrás de otra: unos {num(total / 60, 1)} minutos en este ordenador. Se evalúan en test y se añaden al "
-             "registro de experimentos (1.8).")
+             f"detrás de otra: unos {duracion(total)} {DONDE}. Se evalúan en test y se añaden al registro de "
+             "experimentos (1.8).")
         return
     lineas, nuevas = [], []
     progreso = display(HTML(""), display_id=True)
@@ -1510,7 +1613,9 @@ def _plan_b(ejecutar):
                            diagnostico=etiqueta)
             registrar(entreno, metricas)
             nuevas.append(ESTADO["experimentos"][-1])
-            if nombre == "ref_defecto" and ESTADO["modelo"] is None:   # así 1.5-1.7 funcionan aunque nadie entrenara
+            # Así 1.5-1.7 funcionan aunque nadie entrenara; si el modelo actual ya es un ref_defecto (Plan B repetido),
+            # se sustituye para que 1.5 no vuelva a añadir la fila antigua que se acaba de quitar.
+            if nombre == "ref_defecto" and (ESTADO["modelo"] is None or ESTADO["entreno"]["nombre"] == "ref_defecto"):
                 ESTADO["modelo"], ESTADO["entreno"] = modelo, entreno
             resumen = "sin métricas (valores no válidos)" if metricas is None else (
                 f"acierto (test) {pct(metricas['accuracy'])} · sensibilidad {pct(metricas['sensibilidad'])} · "
@@ -1543,10 +1648,11 @@ md(r'''
 3. Si este modelo se usara para cribar, ¿qué preferirías: más falsas alarmas o más neumonías que se escapan?
    ¿Quién debería decidirlo?
 
-**Puente al Notebook 2.** El detector de personas del siguiente cuaderno, YOLO26 nano, es mayoritariamente
-convolucional, como tu red, pero con unos 2,6 millones de parámetros (la tuya por defecto tiene unos 56.000)
-y un par de bloques de atención. Viene ya entrenado con COCO, un gran conjunto de fotos etiquetadas con 80
-tipos de objeto, y allí no vas a entrenar nada: solo a usarlo.
+**Puente al cuaderno 2.** El detector de personas del cuaderno 2, YOLO26 nano, es sobre todo convolucional,
+como tu red, pero con unos 2,6 millones de parámetros (la tuya por defecto tiene unos 56.000) y un par de
+bloques de atención (una pieza que deja que cada zona de la imagen tenga en cuenta lo que pasa en las demás).
+Viene ya entrenado con COCO, un gran conjunto de fotos etiquetadas con 80 tipos de objeto, y allí no vas a
+entrenar nada: solo a usarlo.
 ''')
 
 

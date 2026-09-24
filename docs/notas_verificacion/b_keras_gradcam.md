@@ -205,6 +205,7 @@ def gradcam(m, img, clase, capa=None):
 | BN (m=0,9) | **116** | **0** |
 | 3 bloques | 0 | 0 |
 
+> ⚠️ Nota del coordinador (24-sep-2026): el 53 % de abajo es de la arquitectura de esta fase (dropout antes de la densa). Con la arquitectura final del cuaderno, el mapa de «Normal» sale vacío en 2 de 197 predicciones (1 %); ver `g_construccion_nb1.md` §8.
 - **Mapas vacíos con la clase «Normal».** En el modelo por defecto, sobre el test completo (624), hay 101 mapas vacíos, y **todos son predicciones «Normal»**: 101 de 190, un 53 %. Hay 84 aciertos y 17 fallos entre ellos, con una confianza media de 0,75 frente a 0,93 en los no vacíos. Si se usa siempre +logit («indicios de neumonía»), bajan a 14. En el modelo con BN y en el de 3 bloques hay 0 vacíos con la clase predicha. **Depende del modelo entrenado.** Recomendación:
   1. Grad-CAM estándar sobre la clase predicha.
   2. Si sale vacío, mostrar la imagen con el texto «Grad-CAM no encuentra ninguna zona que empuje hacia "Normal"». Da juego en el debate: «Normal» se decide a menudo por **ausencia** de indicios.

@@ -50,29 +50,29 @@ md(r'''
 
 [![Abrir en Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/<USUARIO>/<REPO>/blob/main/notebooks/02_conteo_personas_cafeteria.ipynb)
 
-**Qué vamos a hacer.** Aplicar a un vídeo un detector de personas que ya viene entrenado (YOLO26 nano). Sin entrenar nada, vamos a detectar personas en cada fotograma, seguirlas de un fotograma al siguiente, contar cuántas hay en cada zona y cuántas cruzan una línea, y exportar solo los totales para que n8n pueda usarlos.
+**Qué vamos a hacer.** Aplicar a un vídeo un detector de personas que ya viene entrenado (YOLO26 nano). Sin entrenar nada, vamos a detectar personas en cada fotograma, seguirlas de un fotograma al siguiente, contar cuántas hay en cada zona y cuántas cruzan una línea, y exportar solo recuentos, sin imágenes, para que n8n pueda usarlos.
 
-**Cómo se usa.** Ejecuta las celdas en orden con el botón ▶. Algunas tienen controles (desplegables, deslizadores, cajas de texto): cámbialos y vuelve a ejecutar esa celda. No hace falta tocar código.
+**Cómo se usa.** Ejecuta las celdas en orden con el botón ▶. Si al pulsarlo Colab avisa de que el cuaderno no lo ha creado Google, pulsa «Ejecutar de todos modos». Algunas celdas tienen controles (desplegables, deslizadores, cajas de texto): cámbialos y vuelve a ejecutar esa celda y las que vienen detrás. No hace falta tocar código.
 
-> **Contar no es identificar, pero grabar sí es tratar datos.** La imagen de una persona reconocible es un dato personal (RGPD, art. 4), y grabarla o analizarla es un tratamiento aunque al final solo queramos un número. El Comité Europeo de Protección de Datos considera el conteo simple menos intrusivo que la biometría, pero sigue haciendo falta una base legal, informar y guardar lo mínimo. En sitios como las mesas de un bar, la expectativa de no ser grabado pesa más.
+> **Contar no es identificar, pero grabar sí es tratar datos.** La imagen de una persona reconocible es un dato personal (RGPD, art. 4), y grabarla o analizarla es un tratamiento aunque al final solo queramos un número. El Comité Europeo de Protección de Datos ([Directrices 3/2019 sobre el tratamiento de datos personales mediante dispositivos de vídeo](https://www.edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-32019-processing-personal-data-through-video_en)) considera el conteo simple menos intrusivo que la biometría, pero sigue haciendo falta una base legal, informar y guardar lo mínimo. En sitios como las mesas de un bar, la expectativa de no ser grabado pesa más.
 >
 > - No subas vídeos con personas reconocibles si no tienes base legal para usarlos.
-> - Los archivos que exporta el cuaderno (CSV y JSON) solo llevan agregados: personas por zona en cada instante, entradas y salidas. Sin fotogramas ni identificadores.
-> - Los vídeos anotados de 2.5 y 2.6 sí muestran a las personas. Se guardan en `datos/tmp/` y dentro del propio cuaderno: si lo guardas o lo compartes con las salidas, van con él.
-> - En la demo del andén de metro se ven caras de pasajeros cerca de la cámara. La usamos solo para la demostración en clase.
+> - Los archivos que exporta el cuaderno (CSV y JSON) solo llevan recuentos: personas por zona en cada instante, entradas y salidas. Sin fotogramas ni identificadores. Aun así, un recuento muy fino puede señalar a alguien (lo vemos en 2.8).
+> - Los vídeos anotados de 2.5 y 2.6 sí muestran a las personas. Quedan en `datos/tmp/` y en los resultados del cuaderno: antes de guardar una copia o compartirlo, bórralos con **Editar → Borrar todos los resultados**.
+> - En la demo del andén de metro se ven caras de pasajeros cerca de la cámara. Es un vídeo de pruebas que Roboflow publica sin decir de dónde sale, así que no sabemos con qué base legal se grabó: lo usamos solo para esta demostración y no lo redistribuimos. En un proyecto real, eso sería lo primero que habría que resolver.
 >
 > Esto es divulgación, no asesoramiento jurídico.
 
 **Licencias**
-- **Ultralytics YOLO** tiene licencia AGPL-3.0. Puedes usarlo para aprender y experimentar. Si algún día lo metes en un producto, lo ofreces como servicio o distribuyes una versión modificada, la AGPL te obliga a publicar tu código. Para uso comercial cerrado existe una licencia Enterprise de pago.
-- **Vídeos de demostración**: los distribuye Roboflow con la librería `supervision` (licencia MIT, que cubre el código y no los vídeos). Roboflow no publica su origen; el de «personas caminando» coincide con un clip de Pexels (autor: Coverr). Los usamos solo para la demostración en clase, con la licencia de su fuente, y no se redistribuyen.
-- Ultralytics envía por defecto estadísticas de uso anónimas. Este cuaderno las desactiva.
+- **Ultralytics YOLO** tiene licencia AGPL-3.0. Puedes usarlo para aprender y experimentar. Si distribuyes un programa que lo incluya, o una versión modificada que otros usen por internet, la AGPL te obliga a darles el código fuente; Ultralytics entiende que eso alcanza a toda tu aplicación. Para uso comercial cerrado vende una licencia Enterprise.
+- **Vídeos de demostración**: los aloja Roboflow para su librería `supervision`, cuyo código tiene licencia MIT; esa licencia no cubre los vídeos. Roboflow no publica su origen: el de «personas caminando» coincide con un clip de Pexels (autor: Coverr) y el del andén no tiene origen conocido. Su licencia es la de su fuente, que en el del andén no consta, así que los usamos solo para la demostración en clase y no los redistribuimos.
+- Ultralytics envía por defecto estadísticas de uso (versiones, procesador, modelo y un identificador fijo del equipo, calculado a partir de su dirección de red). Este cuaderno las desactiva.
 
 **Índice**
 1. 2.1 Preparación
 2. 2.2 Elige el vídeo
 3. 2.3 Qué ve el detector en un fotograma
-4. 2.4 Zonas y línea de puerta, sin dibujar
+4. 2.4 Zonas y línea de puerta (se escriben, no se dibujan con el ratón)
 5. 2.5 Aforo por zonas
 6. 2.6 Entradas y salidas por una línea
 7. 2.7 Avanzado (opcional): tiempo de permanencia
@@ -91,7 +91,8 @@ Instala lo que falte, descarga el detector (5 MB) y muestra qué ordenador te ha
 
 codigo("2.1 Preparación (la primera vez tarda 1-2 minutos)", r'''
 import base64, contextlib, html, importlib, importlib.util, io, itertools, json, logging, os, platform
-import random, shutil, subprocess, sys, tempfile, time, unicodedata, urllib.error, urllib.request, warnings
+import http.client, random, shutil, subprocess, sys, tempfile, time, unicodedata, urllib.error, urllib.request
+import warnings
 from datetime import datetime
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
@@ -277,10 +278,12 @@ def pasada(sol, v, nombre, por_fotograma):
     if n == 0:
         raise Parar("No se ha podido leer ningún fotograma del tramo. Vuelve a ejecutar la celda 2.2.")
     seg_bucle = time.perf_counter() - t0
-    linea.update(HTML(f"<span style='font-size:15px'>Procesados {n} fotogramas en {es(seg_bucle)} s "
-                      f"({es(n / seg_bucle)} fotogramas por segundo).</span>"))
+    hecho = f"Procesados {n} fotogramas en {es(seg_bucle)} s ({es(n / seg_bucle)} por segundo)"
+    linea.update(HTML(f"<span style='font-size:15px'>{hecho}. Preparando el vídeo…</span>"))
     video = final if a_h264(tmp, final) else None
-    return n, seg_bucle, time.perf_counter() - t0, video
+    seg_total = time.perf_counter() - t0
+    linea.update(HTML(f"<span style='font-size:15px'>{hecho}; {es(seg_total)} s contando la conversión del vídeo.</span>"))
+    return n, seg_bucle, seg_total, video
 
 
 # ---------- Instalación, importaciones y pesos del detector ----------
@@ -291,7 +294,7 @@ with celda():
     if shutil.which("ffmpeg") is None and importlib.util.find_spec("imageio_ffmpeg") is None:
         faltan.append("imageio-ffmpeg")
     if faltan:
-        info("Instalando " + ", ".join(faltan) + ". La primera vez tarda 1-2 minutos.")
+        info("Instalando el detector y sus herramientas. La primera vez tarda 1-2 minutos.")
         fijos = []  # lo que ya trae el entorno no se toca: así no hay que reiniciar la sesión
         for p in ("numpy", "torch", "torchvision", "opencv-python", "opencv-python-headless", "pandas",
                   "matplotlib", "tensorflow", "keras"):
@@ -356,7 +359,8 @@ with celda():
                     "Comprueba la conexión a internet y vuelve a ejecutar esta celda."
                     f"<br><small>Detalle técnico: {html.escape(type(e).__name__)}</small>")
 
-    gpu = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "no hay: todo irá en CPU"
+    gpu = torch.cuda.get_device_name(0) if torch.cuda.is_available() else \
+        "no hay (no hace falta: el cuaderno está pensado para CPU)"
     version_ffmpeg = (subprocess.run([FFMPEG, "-version"], capture_output=True, text=True).stdout.split() + ["?"] * 3)[2] \
         if FFMPEG else "no encontrado: no se podrán ver los vídeos anotados"
     tabla([["Python", platform.python_version()], ["ultralytics", ultralytics.__version__],
@@ -367,7 +371,8 @@ with celda():
            ["Hilos de CPU para el detector", torch_utils.NUM_THREADS], ["Semilla", 42]],
           cabecera=["", "Versión / dato"])
     ESTADO["modelo"] = modelo
-    ok("Preparación terminada. Sigue con la celda 2.2.")
+    ok("Preparación terminada. La tabla le sirve al profesor si algo falla; tú no tienes que tocar nada. "
+       "Sigue con la celda 2.2.")
 ''')
 
 # ---------------------------------------------------------------------------------------------
@@ -380,7 +385,7 @@ Elige una demo o sube tu vídeo, cuántos segundos procesar y cada cuántos foto
 ''')
 
 paso("2.2 Elige el vídeo", r'''
-# @markdown Elige el vídeo y cuánto procesar. Luego pulsa ▶.
+# @markdown Elige el vídeo y cuánto procesar. **saltar_fotogramas**: 1 = mira todos los fotogramas; 2 = uno de cada dos; 3 = uno de cada tres. Cuanto más alto, más rápido; con saltos grandes el seguimiento suele perder más gente. Luego pulsa ▶.
 fuente_video = "Demo 1: personas caminando (interior, vista cenital)"  # @param ["Demo 1: personas caminando (interior, vista cenital)", "Demo 2: andén de metro (interior)", "Subir mi vídeo"]
 segundos_a_procesar = 10  # @param {type:"slider", min:5, max:30, step:1}
 saltar_fotogramas = 2  # @param {type:"slider", min:1, max:5, step:1}
@@ -389,11 +394,16 @@ requiere("modelo")
 reiniciar("video")
 
 # Demos de supervision. Empiezan donde hay algo que contar; «puerta» es la línea recomendada (en %).
+# «sentido»: qué significan entrada y salida con esa línea (texto largo para 2.4, corto para 2.6).
 DEMOS = {
     "Demo 1: personas caminando (interior, vista cenital)":
         {"fichero": "people-walking.mp4", "mb": 8, "inicio_s": 0, "puerta": "0,50; 100,50", "caras": False},
     "Demo 2: andén de metro (interior)":
-        {"fichero": "subway.mp4", "mb": 128, "inicio_s": 22, "puerta": "62,15; 22,100", "caras": True},
+        {"fichero": "subway.mp4", "mb": 128, "inicio_s": 22, "puerta": "62,15; 22,100", "caras": True,
+         "sentido": {"entrada": ("alejarse del tren hacia el andén (por ejemplo, al bajar)", "se alejan del tren"),
+                     "salida": ("ir hacia el tren (por ejemplo, al subir)", "van hacia el tren")},
+         "historia": "Empezamos en el segundo 22, con el tren ya parado y las puertas abiertas: unos bajan, "
+                     "otros suben y el andén se vacía."},
 }
 segundos, salto = float(segundos_a_procesar), int(saltar_fotogramas)
 if segundos <= 0 or salto < 1:
@@ -413,13 +423,15 @@ if fuente_video in DEMOS:
         except Exception:
             try:  # plan B: el mismo archivo, directamente del servidor de Roboflow
                 parcial = CARPETA_VIDEOS / (demo["fichero"] + ".parcial")
-                urllib.request.urlretrieve(
-                    f"https://media.roboflow.com/supervision/video-examples/{demo['fichero']}", parcial)
+                url = f"https://media.roboflow.com/supervision/video-examples/{demo['fichero']}"
+                with urllib.request.urlopen(url, timeout=60) as r, open(parcial, "wb") as f:
+                    shutil.copyfileobj(r, f)
                 parcial.replace(ruta)
             except Exception:
                 raise Parar("No he podido descargar el vídeo de demostración. Comprueba la conexión a internet y "
                             "vuelve a ejecutar la celda, o elige «Subir mi vídeo».")
     inicio_s, puerta, caras = demo["inicio_s"], demo["puerta"], demo["caras"]
+    sentido_auto, historia = demo.get("sentido"), demo.get("historia")
 elif fuente_video == "Subir mi vídeo":
     ruta = CARPETA_VIDEOS / "mi_video.mp4"
     if ruta.exists():
@@ -437,6 +449,7 @@ elif fuente_video == "Subir mi vídeo":
         shutil.move(next(iter(subidos)), ruta)
         del subidos
     inicio_s, puerta, caras = 0, "0,50; 100,50", False
+    sentido_auto = historia = None
 else:
     raise Parar(f"No reconozco la opción «{html.escape(str(fuente_video))}». Elige una del desplegable.")
 
@@ -465,7 +478,7 @@ if tramo < pedidos:
 
 v = {"etiqueta": fuente_video, "fichero": ruta.name, "ruta": str(ruta), "fps": fps, "total": total,
      "inicio_s": inicio_s, "inicio_f": inicio_f, "tramo": tramo, "salto": salto,
-     "n_proc": (tramo + salto - 1) // salto, "segundos": tramo / fps, "puerta": puerta}
+     "n_proc": (tramo + salto - 1) // salto, "segundos": tramo / fps, "puerta": puerta, "sentido_auto": sentido_auto}
 primero = next(fotogramas(v), None)
 if primero is None:
     raise Parar(f"No puedo leer los fotogramas de «{ruta.name}». Prueba con un MP4 (H.264).")
@@ -481,6 +494,8 @@ tabla([["Vídeo", f"{ruta.name} ({html.escape(fuente_video)})"],
        ["Tramo que se procesa", f"del segundo {es(inicio_s, 0)} al {es(inicio_s + v['segundos'])} ({es(v['segundos'])} s)"],
        ["Fotogramas que mirará el detector", f"{v['n_proc']} (uno de cada {salto})"],
        ["fps efectivos tras saltar", es(fps / salto)]])
+if historia:
+    info(historia)
 
 vertical = v["alto"] > v["ancho"]
 fig, ax = plt.subplots(figsize=(5.4, 9.6) if vertical else (10.5, 6))
@@ -491,12 +506,14 @@ mostrar(fig)
 if caras:
     aviso("En este vídeo se ven caras de pasajeros cerca de la cámara. Lo usamos solo para la demostración. "
           "El CSV y el JSON de 2.8 solo llevan números, pero los vídeos anotados de 2.5 y 2.6 muestran esas caras: "
-          "quedan en <code>datos/tmp/</code> y dentro del cuaderno. Borra esas salidas antes de guardarlo o compartirlo.")
+          "quedan en <code>datos/tmp/</code> y en los resultados del cuaderno. Antes de guardar una copia o compartir "
+          "el cuaderno, borra los resultados: menú <b>Editar → Borrar todos los resultados</b> (en inglés, "
+          "<i>Edit → Clear all outputs</i>). En Colab, <code>datos/tmp/</code> se borra solo cuando se cierra la sesión.")
 ok("Vídeo listo. Sigue con la celda 2.3.")
 ''')
 
 md(r'''
-> **Nota para el profesor: un clip de cafetería propio.** Busca en [Pexels](https://www.pexels.com/search/videos/coffee%20shop/) («coffee shop», «cafe people», «overhead people»); por ejemplo, [este clip de una cafetería llena](https://www.pexels.com/video/a-coffee-shop-restaurant-full-of-customers-3135924/). Elige cámara fija y alta, cuerpos enteros, formato horizontal y 10-30 s, y descárgalo en 1280×720 o 1920×1080 (no 4K). La licencia de Pexels permite usarlo gratis y sin atribución, pero Pexels no garantiza que las personas grabadas hayan dado su consentimiento: licencia libre no equivale a consentimiento. Para usarlo, elige «Subir mi vídeo» en 2.2: en Colab aparece un botón de subida (si la sesión se reinicia, hay que volver a subirlo); fuera de Colab, copia el archivo en `datos/videos/mi_video.mp4`. Pruébalo antes de clase: con la cámara a la altura de los ojos hay más oclusiones y cambios de ID que en las demos. Si vas a usar la demo 2 (128 MB), ejecútala una vez antes de empezar para que ya esté descargada en la sesión.
+> **Nota para el profesor** (si eres alumno, sáltala y sigue con 2.3). **Un clip de cafetería propio.** Busca en [Pexels](https://www.pexels.com/search/videos/coffee%20shop/) («coffee shop», «cafe people», «overhead people»); por ejemplo, [este clip de una cafetería llena](https://www.pexels.com/video/a-coffee-shop-restaurant-full-of-customers-3135924/) (ángulo sin comprobar: pruébalo antes). Elige cámara fija y alta, cuerpos enteros, formato horizontal y 10-30 s, y descárgalo en 1280×720 o 1920×1080 (no 4K). La licencia de Pexels permite usarlo gratis y sin atribución, pero Pexels no garantiza que las personas grabadas hayan dado su consentimiento: licencia libre no equivale a consentimiento. Para usarlo, elige «Subir mi vídeo» en 2.2: en Colab aparece un botón de subida (si la sesión se reinicia, hay que volver a subirlo); fuera de Colab, copia el archivo en `datos/videos/mi_video.mp4`. Pruébalo antes de clase: con la cámara a la altura de los ojos hay más oclusiones y cambios de ID que en las demos. Si vas a usar la demo 2 (128 MB), ejecútala una vez antes de empezar para que ya esté descargada en la sesión.
 ''')
 
 # ---------------------------------------------------------------------------------------------
@@ -505,13 +522,13 @@ md(r'''
 md(r'''
 ## 2.3 Qué ve el detector en un fotograma
 
-YOLO26 nano es un detector preentrenado que reconoce 80 tipos de objeto; «persona» es el tipo 0 y es el único que usamos. Por dentro es mayoritariamente convolucional, como la red del Notebook 1, pero con unos 2,6 millones de parámetros y un par de bloques de atención. La primera parte (el *backbone*) saca mapas de activación de la imagen; las **cabezas de detección** convierten esos mapas en cajas, cada una con una **confianza** entre 0 y 1.
+YOLO26 nano es la versión más pequeña de un detector ya entrenado que reconoce 80 tipos de objetos; aquí solo usamos «persona». Por dentro es casi todo convolucional, como tu red del Notebook 1, pero mucho mayor (unos 2,6 millones de parámetros) y con un par de bloques de atención, piezas que miran la imagen entera a la vez. Su primera parte (el *backbone*, la «columna» de la red) saca mapas de activación de la imagen, como los que viste en el Notebook 1. La última parte (las **cabezas de detección**) los convierte en **cajas** alrededor de cada objeto, cada una con una **confianza** entre 0 y 1: lo segura que está la red de que ahí hay una persona.
 
 Mueve la confianza mínima y vuelve a ejecutar: solo cuentan las cajas que la superan.
 ''')
 
 paso("2.3 Qué ve el detector", r'''
-# @markdown Solo se cuentan las cajas con una confianza igual o mayor que este umbral.
+# @markdown Solo se cuentan las cajas con una confianza igual o mayor que este umbral. El valor que dejes aquí es el que usan 2.5 y 2.6.
 confianza_minima = 0.35  # @param {type:"slider", min:0.1, max:0.9, step:0.05}
 ''', r'''
 requiere("modelo", "video")
@@ -560,12 +577,15 @@ ax.legend()
 mostrar(fig)
 
 bajo, alto_ = int((confs >= 0.1).sum()), int((confs >= 0.7).sum())
-info(f"Con {es(conf, 2)} el detector ve <b>{int(vistas.sum())}</b> personas. Con un umbral bajo (0,10) vería "
-     f"{bajo}: más cajas, y algunas pueden ser falsas (falsos positivos). Con uno alto (0,70) vería {alto_}: "
-     "menos errores, pero se pierden personas reales (falsos negativos).")
+info(f"Con {es(conf, 2)} el detector ve <b>{int(vistas.sum())}</b> personas. Compáralo con lo que ves en la imagen: "
+     "cada persona sin caja es una que se le escapa (falso negativo); suelen ser las pequeñas, las del fondo o las que "
+     "van en grupo. Si hay muchas, los recuentos de 2.5 y 2.6 se quedarán cortos. "
+     f"Con un umbral bajo (0,10) vería {bajo}: recupera personas, pero también puede poner cajas donde no hay nadie "
+     f"(falsos positivos). Con uno alto (0,70) vería {alto_}: casi no pone cajas falsas, pero pierde muchas más "
+     "personas reales.")
 if conf < 0.25:
-    aviso("Por debajo de 0,25 el seguimiento de 2.5 y 2.6 no abre IDs nuevos para las cajas más dudosas: "
-          "allí contará menos personas de las que ves aquí.")
+    aviso("Por debajo de 0,25, el seguimiento de 2.5 y 2.6 no empieza a seguir a nadie a partir de una caja tan dudosa "
+          "(solo la usa para no perder a quien ya seguía), así que allí contará menos personas de las que ves aquí.")
 
 # Duración estimada de 2.5 + 2.6: inferencia medida aquí + lectura del vídeo + arranque y conversión.
 lector = fotogramas(v)
@@ -579,7 +599,7 @@ texto = (f"Una detección tarda {es(t_inferencia * 1000, 0)} ms en este ordenado
          f"2.5 y 2.6 con estos ajustes: unos <b>{es(estimacion, 0)} s</b> en total.")
 if estimacion > 100:
     aviso(texto + " Es mucho para clase: sube <b>saltar_fotogramas</b> a 3 o baja los segundos en la celda 2.2, "
-          "y vuelve a ejecutar 2.2 y 2.3.")
+          "y vuelve a ejecutar 2.2, 2.3 y 2.4.")
 else:
     info(texto)
 ''')
@@ -588,9 +608,9 @@ else:
 # 2.4 Zonas y línea
 # ---------------------------------------------------------------------------------------------
 md(r'''
-## 2.4 Zonas y línea de puerta, sin dibujar
+## 2.4 Zonas y línea de puerta (se escriben, no se dibujan con el ratón)
 
-Las zonas se escriben como puntos `x,y` en **porcentaje** de la imagen: `0,0` es la esquina de arriba a la izquierda y `100,100` la de abajo a la derecha. Separa los puntos con `;` y escríbelos en orden, recorriendo el borde. Una zona necesita al menos 3 puntos; la línea de puerta, exactamente 2. Puedes renombrar las zonas (por ejemplo, «Barra» y «Mesas»).
+Las zonas se escriben como puntos `x,y` en **porcentaje** de la imagen: `0,0` es la esquina de arriba a la izquierda y `100,100` la de abajo a la derecha. Aquí la coma no es decimal: separa x de y (`0,50` es x = 0 %, y = 50 %). Si necesitas decimales, usa punto: `12.5,30`. Separa los puntos con `;` y escríbelos en orden, recorriendo el borde. Una zona necesita al menos 3 puntos; la línea de puerta, exactamente 2. Puedes renombrar las zonas (por ejemplo, «Barra» y «Mesas»). En la demo 2, la mitad izquierda es el lado del tren y la derecha el andén; puedes renombrarlas «Junto al tren» y «Andén».
 ''')
 
 paso("2.4 Zonas y línea de puerta", r'''
@@ -599,7 +619,7 @@ nombre_zona_1 = "Izquierda"  # @param {type:"string"}
 zona_1 = "0,0; 50,0; 50,100; 0,100"  # @param {type:"string"}
 nombre_zona_2 = "Derecha"  # @param {type:"string"}
 zona_2 = "50,0; 100,0; 100,100; 50,100"  # @param {type:"string"}
-# @markdown Línea de puerta: dos puntos, o «auto» para usar la recomendada para cada demo.
+# @markdown Línea de puerta: escribe 2 puntos (`x,y; x,y`) o deja «auto» (en las demos, la línea recomendada; en tu vídeo, una horizontal a media altura). Marca **invertir_sentido** si en tu vídeo entrar es cruzar hacia arriba o hacia la izquierda: intercambia entradas y salidas.
 linea_puerta = "auto"  # @param {type:"string"}
 invertir_sentido = False  # @param {type:"boolean"}
 ''', r'''
@@ -661,14 +681,19 @@ if linea_px[0] == linea_px[1]:
                 f"sepáralos. Ejemplo correcto: <code>{EJEMPLO_LINEA}</code> (o escribe <code>auto</code>).")
 # Mismo criterio que ObjectCounter: línea más alta que ancha = vertical (cuenta el paso hacia la derecha);
 # si no, horizontal (cuenta el paso hacia abajo).
-vertical = abs(linea_px[0][0] - linea_px[1][0]) < abs(linea_px[0][1] - linea_px[1][1])
+dx, dy = abs(linea_px[0][0] - linea_px[1][0]), abs(linea_px[0][1] - linea_px[1][1])
+vertical = dx < dy
+inclinada = min(dx, dy) > 0.2 * max(dx, dy)  # más de unos 11° respecto a la horizontal o la vertical
 sentido = (1, 0) if vertical else (0, 1)
 if invertir_sentido:
     sentido = (-sentido[0], -sentido[1])
 entrada_txt = {(1, 0): "hacia la derecha", (-1, 0): "hacia la izquierda", (0, 1): "hacia abajo", (0, -1): "hacia arriba"}[sentido]
+sd = v["sentido_auto"] if auto else None  # qué es entrar y salir con la línea recomendada de la demo
+if sd and invertir_sentido:
+    sd = {"entrada": sd["salida"], "salida": sd["entrada"]}
 ESTADO["zonas"] = {"nombres": list(zonas_pct), "pct": zonas_pct, "px": {n: a_px(p) for n, p in zonas_pct.items()},
                    "linea_texto": texto_linea, "linea_px": linea_px, "sentido": sentido,
-                   "invertir": bool(invertir_sentido), "entrada_txt": entrada_txt}
+                   "invertir": bool(invertir_sentido), "entrada_txt": entrada_txt, "sentido_demo": sd}
 
 vertical_img = H > W
 fig, ax = plt.subplots(figsize=(5.4, 9.6) if vertical_img else (10.5, 6.3))
@@ -687,7 +712,7 @@ for (nombre, puntos), color in zip(zonas_pct.items(), OKABE_ITO):
     ax.text(c.x, c.y, nombre, ha="center", va="center", fontsize=15, weight="bold",
             bbox={"boxstyle": "round", "facecolor": "white", "alpha": 0.85})
 (x0, y0), (x1, y1) = linea_pct
-ax.plot([x0, x1], [y0, y1], color="#D55E00", linewidth=4)
+ax.plot([x0, x1], [y0, y1], color="#7B0068", linewidth=4)  # el mismo morado que la línea del vídeo de 2.6
 mx, my = (x0 + x1) / 2, (y0 + y1) / 2
 punta = (mx + 12 * sentido[0], my + 12 * sentido[1])
 ax.annotate("", xy=punta, xytext=(mx, my), arrowprops={"arrowstyle": "-|>", "color": "#D55E00", "lw": 3, "mutation_scale": 25})
@@ -702,7 +727,11 @@ tabla([[html.escape(n), html.escape(zona_texto)] for n, zona_texto in
       cabecera=["", "Puntos en %"])
 info(f"Cuenta como <b>entrada</b> quien cruza la línea {entrada_txt}, y como salida quien la cruza al revés"
      + (" (sentido invertido con la casilla)" if invertir_sentido else "") +
-     ". Solo cuenta el tramo dibujado de la línea, no su prolongación.")
+     ". Solo cuenta el tramo dibujado de la línea, no su prolongación."
+     + (" Con una línea inclinada solo importa si la persona se mueve "
+        + ("hacia la derecha o hacia la izquierda" if vertical else "hacia abajo o hacia arriba")
+        + ", no a qué lado de la línea acaba." if inclinada else "")
+     + (f" En el andén, <b>entrada</b> es {sd['entrada'][0]} y <b>salida</b> es {sd['salida'][0]}." if sd else ""))
 ok("Zonas listas. Sigue con la celda 2.5.")
 ''')
 
@@ -712,7 +741,9 @@ ok("Zonas listas. Sigue con la celda 2.5.")
 md(r'''
 ## 2.5 Aforo por zonas
 
-El vídeo se procesa fotograma a fotograma: el detector encuentra a las personas, el **seguimiento** (*tracking*) les asigna un número de identificación (**ID**) y se cuenta cuántas hay dentro de cada zona. Una persona está en una zona si el centro de su caja cae dentro.
+Mide la ocupación: cuántas personas hay en cada zona en cada momento. El aforo permitido es el límite que no se debe superar (lo usamos en 2.8).
+
+El vídeo se procesa fotograma a fotograma: el detector encuentra a las personas, el **seguimiento** (*tracking*) les asigna un número de identificación (**ID**) y se cuenta cuántas hay dentro de cada zona. Una persona está en una zona si el centro de su caja cae dentro. El número de ID es una etiqueta, no un recuento de personas: cada persona nueva recibe el siguiente número, y si el seguimiento pierde a alguien un rato, al volver a verlo puede darle otro. Por eso los números crecen más deprisa que la gente.
 ''')
 
 paso("2.5 Aforo por zonas", "", r'''
@@ -768,9 +799,8 @@ mostrar(fig)
 resumen = {z: {"maximo": int(df[z].max()), "media": round(float(df[z].mean()), 2)} for z in zn["nombres"]}
 tabla([[html.escape(z), r_["maximo"], es(r_["media"])] for z, r_ in resumen.items()],
       cabecera=["Zona", "Máximo de personas", "Media de personas"])
-info(f"Cada punto de la gráfica es la ocupación de ese instante, no un acumulado: quien se queda quieto cuenta "
-     f"en todos los fotogramas en los que está. Tiempo de proceso: {es(seg_total)} s para {n} fotogramas "
-     f"({es(n / seg_bucle)} por segundo), incluida la conversión del vídeo.")
+info("La línea marca cuántas personas hay en cada zona en cada instante; no se van sumando: quien se queda quieto "
+     "cuenta en todos los fotogramas en los que está. Los círculos y los cuadrados solo sirven para distinguir las dos líneas.")
 if all(r_["maximo"] == 0 for r_ in resumen.values()):
     aviso("No se ha contado a nadie en ninguna zona. Revisa las zonas en 2.4 o baja la confianza en 2.3.")
 
@@ -791,7 +821,10 @@ Para saber si alguien **cruza** la línea hay que seguirlo de un fotograma al si
 Errores típicos:
 - **Oclusiones**: si alguien queda tapado por otra persona, el seguimiento puede perderlo y no contar su cruce.
 - **Cambio de ID**: si al reaparecer recibe un ID nuevo, la misma persona puede contar dos veces.
-- **Doble conteo**: aquí cada ID cuenta una sola vez; quien cruza y vuelve no suma de nuevo, salvo que haya cambiado de ID.
+- **Doble conteo**: para evitarlo, cada ID cuenta una sola vez, en su primer cruce. Si alguien entra y vuelve a salir dentro del tramo, su salida no se cuenta. Si cambia de ID por el camino, sí puede contar dos veces.
+- **Temblor sobre la línea**: si alguien se queda parado encima de la línea, el temblor de su caja puede contarlo como entrada o salida.
+
+En el vídeo, la línea de puerta es la morada y la flecha naranja marca el sentido de entrada.
 ''')
 
 paso("2.6 Entradas y salidas por la línea", "", r'''
@@ -825,10 +858,10 @@ else:
           "El recuento de abajo es válido.")
 
 entradas, salidas = entradas_salidas()
-ok(f"<b>Entradas: {entradas} · Salidas: {salidas}</b> en {es(v['segundos'])} s de vídeo. Cuenta como entrada "
-   f"quien cruza la línea {zn['entrada_txt']}; cada ID cuenta una sola vez.")
-info(f"Tiempo de proceso: {es(seg_total)} s para {n} fotogramas ({es(n / seg_bucle)} por segundo), "
-     "incluida la conversión del vídeo.")
+sd = zn["sentido_demo"]  # en el andén: qué significa entrar y salir con la línea recomendada
+e_txt, s_txt = (f" ({sd['entrada'][1]})", f" ({sd['salida'][1]})") if sd else ("", "")
+ok(f"<b>Entradas{e_txt}: {entradas} · Salidas{s_txt}: {salidas}</b> en {es(v['segundos'])} s de vídeo. "
+   f"Cuenta como entrada quien cruza la línea {zn['entrada_txt']}; cada ID cuenta una sola vez.")
 if entradas + salidas == 0:
     aviso("Nadie ha cruzado la línea en este tramo. Colócala en 2.4 donde la gente camine atravesándola, "
           "o procesa más segundos en 2.2.")
@@ -851,13 +884,14 @@ v, a = ESTADO["video"], ESTADO["aforo"]
 seg_por_fotograma = v["salto"] / v["fps"]
 
 fig, ejes = plt.subplots(1, len(a["zonas"]), figsize=(11, 4), sharey=True, squeeze=False)
-filas, medias, cortadas_total = [], {}, 0
+filas, medias, cortadas_total, total_estancias = [], {}, 0, 0
 for eje, zona, color in zip(ejes[0], a["zonas"], OKABE_ITO):
     estancias = {id_: n * seg_por_fotograma for (z, id_), n in a["fotos_en_zona"].items()
                  if z == zona and n * seg_por_fotograma >= 1}
     tiempos = list(estancias.values())
     cortadas = sum(1 for id_ in estancias if (zona, id_) in a["en_bordes"])
     cortadas_total += cortadas
+    total_estancias += len(tiempos)
     if tiempos:
         eje.hist(tiempos, bins=np.arange(1, max(tiempos) + 2), color=color, edgecolor="white")
         medias[zona] = round(float(np.mean(tiempos)), 1)
@@ -875,10 +909,16 @@ mostrar(fig)
 
 tabla(filas, cabecera=["Zona", "IDs con 1 s o más", "Mediana (s)", "Media (s)", "Máximo (s)",
                        "Ya estaban al empezar o seguían al acabar"])
-aviso(f"Dos cosas acortan estas cifras. {cortadas_total} estancia(s) ya estaban en curso al empezar el tramo o seguían "
-      "al terminarlo, así que su duración real es mayor. Y si el seguimiento cambia el ID de alguien, su estancia se "
-      "parte en dos más cortas.")
-ESTADO["permanencia"] = medias
+if cortadas_total > total_estancias / 2:
+    aviso(f"Con un tramo de {es(v['segundos'])} s estas cifras dicen poco: {cortadas_total} de {total_estancias} "
+          "estancias ya habían empezado al principio del tramo o seguían al final, así que duraron más de lo que se "
+          "mide aquí. Además, si el seguimiento cambia el ID de alguien, su estancia se parte en dos. Para medir "
+          "permanencia hacen falta minutos de vídeo, no segundos.")
+elif total_estancias:
+    aviso(f"Dos cosas acortan estas cifras. {cortadas_total} de {total_estancias} estancias ya estaban en curso al "
+          "empezar el tramo o seguían al terminarlo, así que su duración real es mayor. Y si el seguimiento cambia el "
+          "ID de alguien, su estancia se parte en dos más cortas.")
+ESTADO["permanencia"] = {"media_s": medias, "estancias": total_estancias, "recortadas": cortadas_total}
 ''')
 
 # ---------------------------------------------------------------------------------------------
@@ -887,7 +927,7 @@ ESTADO["permanencia"] = medias
 md(r'''
 ## 2.8 Exportar para automatizar
 
-Guardamos dos archivos pequeños en `salidas/nb2/`: un CSV con las personas de cada zona en cada instante y un JSON con el resumen. Ninguno contiene imágenes ni IDs.
+Guardamos dos archivos pequeños en `salidas/nb2/`: un CSV con las personas de cada zona en cada instante y un JSON con el resumen. Ninguno contiene imágenes ni IDs. En Colab, el navegador además te los descarga (si pregunta si permites descargar varios archivos, acepta).
 ''')
 
 paso("2.8 Exportar CSV y JSON", "", r'''
@@ -912,9 +952,12 @@ resumen = {
     "zonas": a["resumen"],
     "entradas": linea["entradas"] if linea else None,
     "salidas": linea["salidas"] if linea else None,
-    "permanencia_media_s": permanencia,
+    "permanencia_media_s": permanencia["media_s"] if permanencia else None,
+    # cuántas estancias hay y cuántas recortan los extremos del tramo (esas duran más de lo medido)
+    "permanencia_estancias": permanencia["estancias"] if permanencia else None,
+    "permanencia_recortadas": permanencia["recortadas"] if permanencia else None,
     "tiempos_proceso_s": {"aforo": a["segundos"], "linea": linea["segundos"] if linea else None},
-    "generado_en": datetime.now().isoformat(timespec="seconds"),
+    "generado_en": datetime.now().astimezone().isoformat(timespec="seconds"),  # con la zona horaria
     "nota": "Solo agregados: sin imágenes ni identificadores.",
 }
 ruta_json.write_text(json.dumps(resumen, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -922,7 +965,7 @@ ESTADO["resumen"] = resumen
 
 ok(f"Guardados <code>{ruta_csv}</code> ({len(df)} filas) y <code>{ruta_json}</code>.")
 tabla([[es(fila["t_s"], 2)] + [fila[z] for z in a["zonas"]] for fila in a["serie"][:5]],
-      cabecera=["t_s (primeras filas del CSV)", *[html.escape(z) for z in a["zonas"]]])
+      cabecera=["Segundos desde el inicio del tramo (columna t_s)", *[html.escape(z) for z in a["zonas"]]])
 if not linea:
     aviso("No has ejecutado la celda 2.6: entradas y salidas quedan vacías en el JSON.")
 if EN_COLAB and colab_files is not None:
@@ -933,13 +976,14 @@ if EN_COLAB and colab_files is not None:
         aviso("No se han podido descargar solos. Descárgalos desde el panel Archivos (carpeta salidas/nb2, ⋮ → Descargar).")
 else:
     info(f"Fuera de Colab los archivos quedan en <code>{html.escape(str(CARPETA_SALIDAS.resolve()))}</code>.")
-info("Con muy pocas personas o intervalos muy cortos, incluso un recuento puede ayudar a saber quién era "
-     "(por ejemplo, «a las 9:02 entró 1 persona» junto con el cuadrante de turnos). Un agregado solo deja de ser "
-     "dato personal si de verdad no permite señalar a nadie.")
+info("Con muy pocas personas o intervalos muy cortos, incluso un recuento puede ayudar a saber quién era. Un agregado "
+     "solo deja de ser dato personal si de verdad no permite señalar a nadie. El CSV de este cuaderno va instante a "
+     f"instante (cada {es(v['salto'] / v['fps'], 2)} s) porque es una práctica. En un sistema real se agregaría por "
+     "minutos o por franjas y no se guardarían los recuentos muy bajos.")
 ''')
 
 paso("2.8 (opcional) Enviar el resumen a n8n", r'''
-# @markdown Pega la URL del nodo Webhook de n8n. Si lo dejas vacío, no se envía nada.
+# @markdown Opcional. Si tienes un flujo de n8n con un nodo Webhook (método POST) escuchando, pega aquí su URL. Si no, déjalo vacío: la celda te enseña lo que se enviaría.
 webhook_n8n = ""  # @param {type:"string"}
 ''', r'''
 requiere("resumen")
@@ -960,11 +1004,16 @@ else:
         with urllib.request.urlopen(peticion, timeout=15) as respuesta:
             codigo = respuesta.status
     except urllib.error.HTTPError as e:
-        consejo = (" n8n no encuentra ese webhook. Si usas la URL de prueba (contiene «webhook-test»), n8n solo la "
-                   "escucha mientras el nodo Webhook espera un evento de prueba; con la de producción, el flujo tiene "
-                   "que estar activado." if e.code == 404 else " Revisa la configuración del nodo Webhook (método POST).")
-        raise Parar(f"n8n ha respondido con el código {e.code}.{consejo}")
-    except (urllib.error.URLError, OSError, ValueError):
+        consejo = (" n8n no encuentra un webhook POST en esa dirección. Comprueba que el nodo Webhook tiene el método "
+                   "POST (viene en GET por defecto). Si usas la URL de prueba («webhook-test»), pulsa antes «Listen for "
+                   "test event»; con la de producción, el flujo tiene que estar activado (publicado)."
+                   if e.code == 404 else " Revisa la configuración del nodo Webhook (método POST).")
+        detalle = ""
+        with contextlib.suppress(Exception):  # el mensaje del propio n8n, si lo hay
+            detalle = html.escape(e.read().decode("utf-8", "ignore")[:200])
+        raise Parar(f"n8n ha respondido con el código {e.code}.{consejo}"
+                    + (f"<br><small>Respuesta de n8n: {detalle}</small>" if detalle else ""))
+    except (urllib.error.URLError, OSError, ValueError, http.client.HTTPException):
         raise Parar("No he podido conectar con esa dirección. Comprueba que la URL está completa y que n8n está "
                     "en marcha, y vuelve a ejecutar la celda.")
     ok(f"Enviado. n8n ha respondido con el código {codigo}.")
@@ -976,6 +1025,8 @@ md(r'''
 2. **IF**: comprueba si el máximo de una zona supera el aforo permitido, por ejemplo `{{ $json.body.zonas.Izquierda.maximo }}` mayor que 12.
 3. Si lo supera: **aviso** por correo o por Telegram con la zona, el máximo y la hora (`generado_en`).
 4. En todos los casos: **registro** de una fila en una hoja de cálculo para ver la evolución por días.
+
+El máximo es el de un solo fotograma y puede deberse a un parpadeo del detector; en un sistema real se usaría el máximo que se mantiene unos segundos.
 ''')
 
 # ---------------------------------------------------------------------------------------------
@@ -986,9 +1037,10 @@ md(r'''
 
 **Límites de este sistema**
 - **Oclusiones y multitudes**: cuando unas personas tapan a otras, el detector suele perder a algunas y el recuento se queda corto.
+- **Tamaño**: el detector trabaja con la imagen reducida a 640 px de lado largo, así que las personas pequeñas o lejanas, como las del fondo, suelen perderse y el recuento se queda corto.
 - **Ángulo de cámara y luz**: suele funcionar mejor con la cámara alta y fija y buena luz; a la altura de los ojos hay más oclusiones.
 - **Cambios de ID**: parten estancias y pueden duplicar entradas.
-- **Perspectiva**: las zonas se dibujan sobre la imagen, no sobre el suelo, y se cuenta por el centro de la caja, no por los pies.
+- **Perspectiva**: la zona se marca sobre la imagen plana, no sobre el suelo real, y una persona cuenta donde cae el centro de su caja (más o menos a la altura de la cintura), no donde pisa. Con la cámara inclinada, alguien puede contar en una zona que no está pisando.
 - **Contar no es identificar**: el sistema no sabe quién es nadie, pero el vídeo sí contiene datos personales.
 
 **POC ≠ producción.** Esto es un prototipo: llevarlo a un local real exige medir el error con vídeo propio, decidir dónde se procesa y qué se guarda, y cumplir la normativa de protección de datos.
@@ -1009,7 +1061,8 @@ md(r'''
 for i, c in enumerate(celdas):
     c.id = f"nb2-{i:02d}"
 nb = nbformat.v4.new_notebook(cells=celdas, metadata={
-    "colab": {"provenance": [], "toc_visible": True},
+    # private_outputs: Colab no guarda los resultados al guardar el cuaderno (los vídeos anotados muestran personas)
+    "colab": {"provenance": [], "toc_visible": True, "private_outputs": True},
     "kernelspec": {"name": "python3", "display_name": "Python 3", "language": "python"},
     "language_info": {"name": "python"},
 })

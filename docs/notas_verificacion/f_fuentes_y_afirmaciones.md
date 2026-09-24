@@ -61,6 +61,10 @@ Web: <https://poloclub.github.io/cnn-explainer/> (HTTP 200 el 24-sep-2026). Cód
 
 🟡 El recorrido está verificado en el código desplegado (rama `gh-pages`, último commit del 6-oct-2023), **no clicando en un navegador**. Ensayarlo una vez antes de clase.
 
+> ⚠️ **Corrección tras ensayarlo en navegador (coordinador, 24-sep-2026):** el clic en una neurona de `conv_1_1` abre primero una vista
+> intermedia (canales R, G, B y la suma); la ventana *Convolution* sale con un **segundo clic** en uno de los cuadros *intermediate*.
+> Un segundo clic en la misma neurona cierra la ventana. Detalle en `h_ensayo_cnn_explainer.md`.
+
 **Recorrido para el profesor (9 min)**
 
 | Min | Qué hacer | Qué decir (idea) |

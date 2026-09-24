@@ -257,3 +257,66 @@ barras de 1.5 y gráfico de un solo punto.
   la cota queda entre 1,6 y 11 veces por encima de la estimación medida). Si en Colab 1.3 bloquea por tiempo una
   solución que ha propuesto, hay que subir la constante.
 - Las carpetas `verificacion/rapido/` y `verificacion/referencias/` guardan ahora la ejecución de `.venv`, que fue la última.
+
+## 8. Correcciones tras las revisiones adversariales (24-sep-2026)
+
+Dos revisiones adversariales del NB1 (lente de alumna y lente técnica) y un escéptico que verificó cada hallazgo.
+Cuando el hallazgo y el escéptico no coincidían, se ha aplicado el arreglo del escéptico. Solo se ha tocado
+`src/build_nb1.py`. Material en `verificacion/fix2_nb1/`: `sondas.py` (17 escenarios de alumno sobre el código
+real: 1.3 cambiada sin entrenar, 1.3 imposible con y sin modelo, bloqueo por tiempo, descarga en Colab simulada,
+Plan B dos veces), `t_gradcam_formas.py` (Grad-CAM con 3 bloques, 1 bloque sin pooling, 64 px y mapa vacío),
+`t_mapas64.py`, `volcar.py`, los volcados de texto y los PNG.
+
+**Aplicado**
+
+| Dónde | Cambio |
+|---|---|
+| Portada | Título «Cuaderno 1»; «Cada uno prueba…» con hoja común; aviso condicional de Colab («Si al pulsar ▶ por primera vez Colab te avisa… pulsa **Ejecutar de todos modos**»; el rótulo exacto es 🟡, nota e); «hasta la 1.9»; «Cambios: solo se pasa el brillo… no se recorta ni se retoca ninguna imagen»; «Son radiografías reales, publicadas por sus autores con licencia abierta (CC BY 4.0)» (sin «anonimizadas», que no está comprobado) |
+| 1.1 | Texto de la semilla: «en el mismo entorno, repetir un entrenamiento dé lo mismo». Rótulo sobre la tabla de versiones («no hace falta que las mires»). Salida final: «Tarjeta gráfica (GPU): no, y no hace falta · Semilla: 42». Se quitan procesador y núcleos (el brief no los pide) |
+| 1.2 | Validación: «imágenes que la red no usa para aprender; sirven para comprobar, mientras entrena, si aprende de verdad o solo memoriza». Figura: «Normales y neumonías en cada conjunto» |
+| 1.3 tabla | Glosas nuevas de `tamano_kernel` (lado del filtro, «el kernel de CNN Explainer»), `usar_batchnorm`, `dropout` (con «en el deslizador sale 0.2»), `neuronas_capa_densa`, `compensar_desbalanceo` («cuenta unas 3 veces más», 1,94/0,67 ≈ 2,9) y `nombre_experimento` (iniciales + reto, «ALM_A»). Línea «Red por defecto» con los nombres reales de los controles (la misma cadena, `RED_DEFECTO`, se inserta en 1.3 y 1.9) |
+| 1.3 salida | Línea bajo la tabla de capas (forma de salida, aplanar, logit, sigmoide). Tiempos: «en la máquina de Colab» si `EN_COLAB`, «en este ordenador» en local; minutos solo desde 120 s; «sin contar el dibujo de las curvas». Bloqueo por tiempo con soluciones a medida: «activa el pooling» solo si está desactivado, «baja la resolución a 28» solo a 64 px, siempre «baja las épocas (ahora N)» y «usa menos filtros o neuronas». Aviso de Grad-CAM: «tendrá solo N×N cuadros» |
+| 1.4 | Markdown con **colapso** y «falla más con radiografías nuevas». Salida: diagnóstico + una línea de reglas visible (spec) + cifras del entrenamiento dentro de `<details>`. Las reglas dicen que la pérdida de entrenamiento es la media de la época con el dropout activo. «Fíjate» corregido: «con la red por defecto suele pasar en todas las épocas» (comprobado en `def_08_4.png`: 8 de 8), y la frase de la compensación solo si se compensa. El tiempo registrado es la suma de los tiempos de época del callback, sin el dibujo: la red por defecto sale 4,1-4,3 s en 1.4 frente a 4,0-4,1 s en el Plan B (antes 4,1 frente a 3,0) |
+| 1.5 | Nota de rigor al markdown. Tarjeta AUC: «elegidas al azar una neumonía y una normal, probabilidad de que la red puntúe más alto la neumonía». Recuadro clínico en 3 líneas, con «lo decide el equipo clínico». Línea validación/test dinámica: calcula sensibilidad y especificidad en validación y nombra la clase en la que más cae («especificidad del 88,1 % en validación frente al 75,6 % en test» con la red por defecto); ya no atribuye la diferencia a la prevalencia ni usa el paréntesis «el de validación del estudio original». Cierra con «Siguiente paso: 1.6. Si estás haciendo un reto, ejecuta también 1.8…» |
+| `modelo_listo` (1.5-1.7) | Primera línea «Resultados del experimento n.º X («nombre»)». Aviso si 1.3 es inválida o si el diseño de 1.3 (`diseno()`, compartida con 1.3) difiere del entrenado. Sin modelo y con 1.3 inválida: «corrígela… y ejecuta 1.3 y 1.4» en lugar de «ejecuta 1.4» |
+| 1.6 | Markdown del índice (0-623, «Test n.º» del título, se ignora con las opciones aleatorias). Título «Test n.º i · Real: X / Predicción: Y · NN %». «Cuadrícula de 3×3 números aprendidos (pesos)». Título del último bloque suavizado («en esta red pequeña, muchos filtros responden sobre todo al brillo») y nota nueva de los mapas. `t_mapas64.py`: también a 64 px muchos mapas se parecen al brillo (bloque 2: r 0,63-0,95), así que la nota no dice «a 28 px» |
+| 1.7 | Markdown llano (sin gradientes ni paréntesis). Figura en pares «Radiografía» / «Dónde miró», con real y predicción encima de cada par. Porcentaje con el mismo formato que 1.6 y «> 99 %» en lugar de «100 %»; línea «El porcentaje es la probabilidad que da la red a su respuesta…». **Geometría**: cada casilla de la última ReLU se pinta sobre su centro real (recorrido de capas: la convolución suma (k−1)/2·paso y el pooling suma paso/2 y duplica el paso; por defecto centro 3,5 y paso 2) con `imshow(extent=…, interpolation="bilinear")`; ya no se estira con `tf.image.resize`. El recuadro lo explica: «el marco sin color es la zona que esa capa no cubre». Revisado a 2 y 3 bloques, 1 bloque sin pooling, 64 px y mapa vacío |
+| Zech | «En 3 de 5 comparaciones, los modelos rendían peor fuera del hospital…» (f_fuentes §1) |
+| 1.8 / 1.10 gráfico | Eje x «Parámetros de la red / (cada marca vale 10 veces más que la anterior)» en dos líneas (en una se pisaban los dos paneles); marcas «1 millón», «10 millones»; «Siempre «Neumonía»: 0 % (muy por debajo, fuera del gráfico)». Nota de ruido: «no saques conclusiones de ella. Fíjate solo en las diferencias grandes» (sin «repetir con compañeros»: misma semilla y misma máquina dan las mismas cifras) |
+| 1.8 | «Copia solo la segunda línea… La primera son los nombres de las columnas, que ya están en la hoja». En Colab el CSV solo se descarga si el registro ha cambiado desde la última descarga (`ESTADO["descargado"]`), y se dice qué es («tu tabla con todos tus experimentos… Para la hoja común basta con la línea de arriba») |
+| 1.9 | Trabajo individual: «El profesor dirá en clase qué reto te toca», iniciales + reto en `nombre_experimento`, 1.3 → 1.4 → 1.5 → 1.8 en cada entrenamiento, dos líneas en A y C, enlace a la hoja en el chat. Red por defecto escrita. Reto C «(sin pooling, 20 épocas)» en título y desplegable (`_guardar_reto` corta en « ·», sigue dando «C»). La confirmación añade «Comprueba que es el reto que te ha dado el profesor» |
+| 1.10 | «Plan B (solo el profesor)» + «**No ejecutes esta celda.**» (markdown, título de la celda e índice). La tabla del ensayo ya no enseña parámetros. Tiempo total «unos 60 s en este ordenador» / «en la máquina de Colab». Plan B repetido: si el modelo actual ya es un `ref_defecto`, se sustituye; antes 1.5 volvía a añadir la fila antigua (comprobado en `sondas.py`: una sola fila `ref_defecto`) |
+| 1.11 | «Puente al cuaderno 2», «sobre todo convolucional» y glosa de «bloques de atención». Sin nombrar ChatGPT (regla de herramientas) y manteniendo «la tuya por defecto» |
+
+**No aplicado (y por qué)**
+
+| Hallazgo | Motivo |
+|---|---|
+| Renombrar `tamano_kernel` → `lado_del_filtro` y la columna `kernel` → `filtro_lado` | Contrato del brief y de `verificar.py`. Solo cambia la prosa |
+| Opción «Número concreto» en 1.6 | La especificación fija las opciones y `_que_ve` compara el texto. Se explica en el markdown |
+| «desequilibrados» en 1.2 | Se mantiene «desbalanceados» en negrita para que enlace con `compensar_desbalanceo` |
+| Cabecera en castellano con tildes en la línea para la hoja común | Opcional según el escéptico. La cabecera sale de `COLUMNAS` (contrato del CSV); el profesor la copia una vez a la hoja. Dos vocabularios para lo mismo confundirían más |
+| Opción «— Elige tu reto —» por defecto en 1.9 | Se desvía de la especificación y exigiría registrarlo en `DECISIONS.md`, que este encargo no puede tocar. Se aplica la alternativa del escéptico (confirmación con «Comprueba que es el reto…») |
+| Casilla `descargar_tabla` | El brief pide la descarga en Colab. Se evita la repetición con la firma del registro |
+| Diagnóstico con pérdidas en modo inferencia y umbral recalibrado (~1,9-2,0) | El escéptico refuta la consecuencia: el contraste del reto C se mantiene en 3/3 semillas. Se aplica el arreglo ligero (las reglas dicen cómo se mide la pérdida de entrenamiento). Recalibrar movería el diagnóstico de todo el Plan B sin necesidad |
+| Selección de canales sin duplicados (\|r\| < 0,9) | La especificación fija «los 8 canales con mayor activación media». Solo se suavizan título y nota |
+| `tf.config.experimental.enable_op_determinism()` con GPU | Sin GPU aquí para probarlo y puede lanzar `UnimplementedError`. Solo cambia el texto de la semilla |
+| Actualizar D18 en `DECISIONS.md` y el 53 % de la nota b | Fuera de los ficheros de este encargo. Dato corregido para quien los actualice: con la arquitectura final y semilla 42, el mapa de «Normal» sale vacío en 2 de 197 predicciones (1 %), según el escéptico con `verificacion/rev_nb1/t_gradcam.py`; el 53 % es de la arquitectura de la fase 1 |
+| «anonimizadas» en la portada | 🟡 sin comprobar en Kermany et al. 2018. Si Lou lo confirma, se añade |
+
+**Verificación.** Generador determinista (mismo SHA-1 en dos ejecuciones: `5063d6cd…`). `verificar.py --nb 1` con
+`rapido`, `defecto`, `imposible` y `referencias` en `.venv`: 0 errores, 0 líneas en stderr, sin problemas de
+estructura, aviso de 0×0 detectado (informe `verificacion/informe_20260924-111111.md`). `.venv-colab` `rapido`:
+0 errores, 0 stderr (`informe_20260924-111203.md`). Métricas del Plan B idénticas a la sección 5 (los tiempos
+bajan algo porque ya no incluyen el dibujo). `sondas.py`: 17/17. PNG revisados a ojo: Grad-CAM en pares (2 y 3
+bloques, 64 px, mapa vacío; también con matplotlib 3.10), gráfico del Plan B, gráfico de un punto, mapas de
+activación y título de 1.6.
+
+**Pendiente para Lou**
+- Poner el enlace de la hoja común en el chat de la clase (1.9 lo da por hecho) y crear la hoja con la cabecera
+  de la línea de 1.8.
+- 🟡 Comprobar en Colab real el rótulo del botón del aviso («Ejecutar de todos modos») y que `<details>` se
+  despliega en la salida de 1.4.
+- Rótulos con `#` en el gráfico (decisión 11) siguen pendientes de su visto bueno.
+- Las carpetas `verificacion/rapido/` y `verificacion/defecto/` quedan con la última ejecución: `rapido` es la de
+  `.venv-colab`.
