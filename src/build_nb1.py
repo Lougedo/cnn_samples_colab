@@ -1455,8 +1455,9 @@ def _registro():
     mostrar_experimentos(filas)
     ultima = filas[-1]
     nota(f"<b>Línea para la hoja común de la clase</b> (experimento n.º {ultima['id']}, "
-         f"«{html.escape(ultima['experimento'])}»). Copia solo la segunda línea y pégala en la primera fila libre de "
-         "la hoja común: cada valor cae en su columna. La primera son los nombres de las columnas, que ya están en "
+         f"«{html.escape(ultima['experimento'])}»). Copia solo la segunda línea y pégala en tu fila de "
+         "la hoja común (la que te diga el profesor; si no tienes, la primera libre): cada valor cae en su columna. "
+         "La primera son los nombres de las columnas, que ya están en "
          "la hoja.")
     display(HTML('<pre style="font-size:13px; padding:8px; border:1px solid #8888; overflow-x:auto">'
                  + html.escape(_linea_resumen(ultima)) + "</pre>"))

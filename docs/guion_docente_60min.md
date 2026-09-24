@@ -128,7 +128,7 @@ slide 27; 🟡 no consta si se llegó a dar). Si se dio, en 8e/3b basta con reco
    - Fila 2: pega la **segunda** línea de tu `ref_defecto`. Es la referencia con la que comparan B y D.
    - **Desde la fila 3, una fila por alumno**, en el orden del reparto (punto 5); A y C, dos filas seguidas. La fila siguiente
      a la última asignada queda para `ref_C_dropout_05_20_epocas`. Quien llegue tarde o haga experimentos extra, debajo.
-     Así nadie pega a la vez en la misma «primera fila libre», que es lo que dice el cuaderno: en Sheets, dos que pegan en la
+     Así nadie pega a la vez en la misma «primera fila libre» (el cuaderno dice «tu fila, la que te diga el profesor»): en Sheets, dos que pegan en la
      misma fila se pisan y la del primero se pierde sin que nadie lo note 🟡.
    - Inmoviliza la fila 1, configuración regional España (para la coma decimal) y «cualquiera con el enlace puede editar» 🟡 (rótulos de menú sin comprobar).
    - Si en clase desaparece una fila: Archivo → Historial de versiones 🟡, o que el alumno la vuelva a pegar desde su 1.8.
