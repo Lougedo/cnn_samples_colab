@@ -71,7 +71,8 @@ Algo así:
 Cambia los controles (deslizador, casilla, desplegable o texto) y pulsa ▶: el resultado aparece debajo.
 Si al pulsar ▶ por primera vez Colab te avisa de que este cuaderno no lo ha creado Google, es normal:
 pulsa **Ejecutar de todos modos**. Tarda unos segundos en conectarse.
-Ejecuta las celdas en orden, de arriba abajo, hasta la 1.9. Si a una celda le falta un paso anterior, te dirá cuál.
+Ejecuta 1.1 y 1.2. Si en clase te han dado un reto, salta a 1.9 para apuntar el reto y tu hipótesis y vuelve a 1.3;
+si no, sigue en orden, de arriba abajo, hasta la 1.9. Si a una celda le falta un paso anterior, te dirá cuál.
 
 **Índice**
 1.1 Preparación · 1.2 Los datos · 1.3 Diseña tu red · 1.4 Entrena · 1.5 Evalúa en test ·
