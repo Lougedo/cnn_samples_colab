@@ -65,7 +65,7 @@ Algo así:
  ▶  1.3 Diseña tu red
     bloques_convolucionales:  ──●──────────  2
     usar_pooling:             ☑
-    nombre_experimento:       [ grupo_1        ]
+    nombre_experimento:       [ INICIALES_RETO ]
 ```
 
 Cambia los controles (deslizador, casilla, desplegable o texto) y pulsa ▶: el resultado aparece debajo.
@@ -805,7 +805,7 @@ dropout = 0.2  # @param {type:"slider", min:0, max:0.6, step:0.1}
 neuronas_capa_densa = 64  # @param [0, 32, 64, 128] {type:"raw"}
 compensar_desbalanceo = False  # @param {type:"boolean"}
 epocas = 8  # @param {type:"slider", min:3, max:20, step:1}
-nombre_experimento = "grupo_1"  # @param {type:"string"}
+nombre_experimento = "INICIALES_RETO"  # @param {type:"string"}
 
 
 def _tipo_capa(capa):
@@ -1008,6 +1008,8 @@ mide también en **validación**, con imágenes que no usa para aprender. Cada v
 la red empieza desde cero, con la misma semilla. Al final verás un diagnóstico: **sobreajuste** = memoriza
 las imágenes de entrenamiento y falla más con radiografías nuevas; **infraajuste** = aún no ha aprendido lo
 suficiente; **colapso** = responde siempre lo mismo.
+
+Si has cambiado algo en 1.3, pulsa antes su ▶: si no, se entrena la red de la vez anterior.
 ''')
 
 codigo("1.4 Entrena la red", r'''
@@ -1017,6 +1019,8 @@ def _entrenar_red():
         error(f"Diseñaste la red para imágenes de {cfg['resolucion']}×{cfg['resolucion']} px, pero en 1.2 has "
               f"cargado las de {ESTADO['resolucion']}×{ESTADO['resolucion']} px. Vuelve a ejecutar 1.3.")
         return
+    nota(f"Entrenando «{html.escape(cfg['nombre'])}»: {num(ESTADO['red_actual'][2])} parámetros, según la última vez "
+         "que ejecutaste 1.3.")
     total = cfg["epocas"]
 
     class CurvasEnVivo(keras.callbacks.Callback):
@@ -1187,7 +1191,7 @@ def _evaluar_test():
              "optimista.")
     if registrar(entreno, m):
         ok(f"Resultados anotados en el registro de experimentos (1.8) como n.º {entreno['id']}.")
-    nota("Siguiente paso: <b>1.6</b>. Si estás haciendo un reto, ejecuta también <b>1.8</b> y copia tu línea.")
+    nota("Si estás haciendo un reto, ve a <b>1.8</b> y copia tu línea; luego, <b>1.6</b>. Si no, sigue en <b>1.6</b>.")
 
 
 if "ESTADO" not in globals():
@@ -1454,13 +1458,19 @@ def _registro():
         return
     mostrar_experimentos(filas)
     ultima = filas[-1]
+    cabecera, datos = _linea_resumen(ultima).split("\n")
     nota(f"<b>Línea para la hoja común de la clase</b> (experimento n.º {ultima['id']}, "
-         f"«{html.escape(ultima['experimento'])}»). Copia solo la segunda línea y pégala en tu fila de "
-         "la hoja común (la que te diga el profesor; si no tienes, la primera libre): cada valor cae en su columna. "
-         "La primera son los nombres de las columnas, que ya están en "
-         "la hoja.")
-    display(HTML('<pre style="font-size:13px; padding:8px; border:1px solid #8888; overflow-x:auto">'
-                 + html.escape(_linea_resumen(ultima)) + "</pre>"))
+         f"«{html.escape(ultima['experimento'])}»). Salen dos líneas: la de arriba son los nombres de las columnas, "
+         "que ya están en la hoja. Copia la de abajo, entera, y pégala en la pestaña «Resultados» de la hoja común, "
+         "en tu fila (en la pestaña «Reparto» ves cuál es; si no tienes, debajo de «Desde aquí, libres»): haz clic "
+         "en la columna A de tu fila y pega. Cada valor cae en su columna.")
+    display(HTML('<pre style="font-size:12px; padding:6px; overflow-x:auto; opacity:0.7">'
+                 + html.escape(cabecera) + "</pre>"))
+    display(HTML('<pre style="font-size:13px; padding:8px; border:1px solid #8888; overflow-x:auto; user-select:all">'
+                 + html.escape(datos) + "</pre>"))
+    if not ultima["reto"]:
+        aviso("Esta línea sale sin reto ni hipótesis: la 1.9 no estaba ejecutada cuando entrenaste. Si estás haciendo "
+              "un reto, escríbelos a mano en esas dos columnas de la hoja y ejecuta la 1.9 antes de volver a entrenar.")
     if ultima["accuracy"] is None:
         aviso("Este experimento aún no tiene métricas de test: ejecuta 1.5 y vuelve aquí.")
     if not guardar_csv():
@@ -1497,12 +1507,14 @@ else:
 md(r'''
 ## 1.9 Retos guiados
 Cada uno trabaja en su portátil. El profesor dirá en clase qué reto te toca (A, B, C o D). En
-`nombre_experimento` (1.3) pon tus iniciales y el reto, por ejemplo «ALM_A». Antes de entrenar,
-**escribe tu hipótesis** en la celda de abajo: ¿qué crees que pasará?
+`nombre_experimento` (1.3) pon tus iniciales y el reto, por ejemplo «ALM_A». Antes de entrenar, elige tu reto,
+**escribe tu hipótesis** en la celda de abajo (¿qué crees que pasará?) y pulsa ▶ en esa celda: si no la
+ejecutas, tu línea saldrá sin reto ni hipótesis.
 
 Para cada entrenamiento, cambia en 1.3 lo que pide el reto y ejecuta 1.3 → 1.4 → 1.5 → 1.8. En 1.8, copia
 tu línea en la hoja común (el enlace está en el chat de la clase). En los retos A y C entrenas dos veces,
-así que copias dos líneas.
+así que copias dos líneas. Si vas a entrenar otra vez, pega antes tu línea en la hoja: 1.8 solo enseña la del
+último entrenamiento.
 
 Empieza cada reto desde la red por defecto: __RED_DEFECTO__ Si has tocado algo, vuelve a estos valores
 antes de empezar.
@@ -1517,6 +1529,7 @@ parámetros, el tiempo de entrenamiento y las métricas.
 **C · Dropout 0 frente a 0,5 (sin pooling, 20 épocas).** En 1.3 desmarca `usar_pooling`, pon `epocas` en 20
 y entrena dos veces: con `dropout` en 0 y con `dropout` en 0,5 (en el deslizador sale 0.5). Mira las curvas
 de pérdida en 1.4: ¿se separan la de entrenamiento y la de validación? ¿Qué dice el diagnóstico en cada caso?
+Si vas justo de tiempo, entrena solo con dropout 0 y compara con la fila de referencia que pega el profesor.
 
 **D · Compensar el desbalanceo.** En 1.3 marca `compensar_desbalanceo` y entrena. Compara la sensibilidad y la
 especificidad con las de la red por defecto.

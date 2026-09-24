@@ -221,7 +221,7 @@ uv pip install --python .venv/bin/python -r requirements-verificacion.txt
 .venv/bin/python scripts/verificar.py --nb 1 --modos rapido defecto imposible referencias
 .venv/bin/python scripts/verificar.py --nb 1 --modos defecto referencias --hilos 2        # proxy de Colab
 .venv/bin/python scripts/verificar.py --nb 2 --modos defecto --hilos 1
-.venv/bin/python scripts/verificar.py --nb 2 --modos defecto --set fuente_video="Demo 2: andén de metro (interior)"
+.venv/bin/python scripts/verificar.py --nb 2 --modos defecto --set fuente_video="Demo 2: andén de metro (128 MB, con caras, mejor en casa)"
 ```
 
 | Modo | Qué ejecuta |

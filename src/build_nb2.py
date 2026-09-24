@@ -386,7 +386,7 @@ Elige una demo o sube tu vídeo, cuántos segundos procesar y cada cuántos foto
 
 paso("2.2 Elige el vídeo", r'''
 # @markdown Elige el vídeo y cuánto procesar. **saltar_fotogramas**: 1 = mira todos los fotogramas; 2 = uno de cada dos; 3 = uno de cada tres. Cuanto más alto, más rápido; con saltos grandes el seguimiento suele perder más gente. Luego pulsa ▶.
-fuente_video = "Demo 1: personas caminando (interior, vista cenital)"  # @param ["Demo 1: personas caminando (interior, vista cenital)", "Demo 2: andén de metro (interior)", "Subir mi vídeo"]
+fuente_video = "Demo 1: personas caminando (interior, cámara alta)"  # @param ["Demo 1: personas caminando (interior, cámara alta)", "Demo 2: andén de metro (128 MB, con caras, mejor en casa)", "Subir mi vídeo"]
 segundos_a_procesar = 10  # @param {type:"slider", min:5, max:30, step:1}
 saltar_fotogramas = 2  # @param {type:"slider", min:1, max:5, step:1}
 ''', r'''
@@ -396,9 +396,9 @@ reiniciar("video")
 # Demos de supervision. Empiezan donde hay algo que contar; «puerta» es la línea recomendada (en %).
 # «sentido»: qué significan entrada y salida con esa línea (texto largo para 2.4, corto para 2.6).
 DEMOS = {
-    "Demo 1: personas caminando (interior, vista cenital)":
+    "Demo 1: personas caminando (interior, cámara alta)":
         {"fichero": "people-walking.mp4", "mb": 8, "inicio_s": 0, "puerta": "0,50; 100,50", "caras": False},
-    "Demo 2: andén de metro (interior)":
+    "Demo 2: andén de metro (128 MB, con caras, mejor en casa)":
         {"fichero": "subway.mp4", "mb": 128, "inicio_s": 22, "puerta": "62,15; 22,100", "caras": True,
          "sentido": {"entrada": ("alejarse del tren hacia el andén (por ejemplo, al bajar)", "se alejan del tren"),
                      "salida": ("ir hacia el tren (por ejemplo, al subir)", "van hacia el tren")},
@@ -522,7 +522,7 @@ md(r'''
 md(r'''
 ## 2.3 Qué ve el detector en un fotograma
 
-YOLO26 nano es la versión más pequeña de un detector ya entrenado que reconoce 80 tipos de objetos; aquí solo usamos «persona». Por dentro es casi todo convolucional, como tu red del Notebook 1, pero mucho mayor (unos 2,6 millones de parámetros) y con un par de bloques de atención, piezas que miran la imagen entera a la vez. Su primera parte (el *backbone*, la «columna» de la red) saca mapas de activación de la imagen, como los que viste en el Notebook 1. La última parte (las **cabezas de detección**) los convierte en **cajas** alrededor de cada objeto, cada una con una **confianza** entre 0 y 1: lo segura que está la red de que ahí hay una persona.
+YOLO26 nano es la versión más pequeña de un detector ya entrenado que reconoce 80 tipos de objetos; aquí solo usamos «persona». Por dentro es casi todo convolucional, como tu red del cuaderno 1, pero mucho mayor (unos 2,6 millones de parámetros) y con un par de bloques de atención, piezas que miran la imagen entera a la vez. Su primera parte (el *backbone*, la «columna» de la red) saca mapas de activación de la imagen, como los que viste en el cuaderno 1. La última parte (las **cabezas de detección**) los convierte en **cajas** alrededor de cada objeto, cada una con una **confianza** entre 0 y 1: lo segura que está la red de que ahí hay una persona.
 
 Mueve la confianza mínima y vuelve a ejecutar: solo cuentan las cajas que la superan.
 ''')
@@ -559,7 +559,7 @@ ax.imshow(primer[..., ::-1])
 for (x0, y0, x1, y1), c in zip(cajas[vistas], confs[vistas]):
     ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, fill=False, edgecolor="#E69F00", linewidth=2))
     ax.text(x0, y0 - 3, es(c, 2), color="black", fontsize=12, bbox={"facecolor": "#E69F00", "edgecolor": "none", "pad": 1})
-ax.set_title(f"{int(vistas.sum())} personas con confianza ≥ {es(conf, 2)}")
+ax.set_title(f"{int(vistas.sum())} personas detectadas (confianza ≥ {es(conf, 2)})")
 ax.axis("off")
 mostrar(fig)
 
@@ -577,11 +577,11 @@ ax.legend()
 mostrar(fig)
 
 bajo, alto_ = int((confs >= 0.1).sum()), int((confs >= 0.7).sum())
-info(f"Con {es(conf, 2)} el detector ve <b>{int(vistas.sum())}</b> personas. Compáralo con lo que ves en la imagen: "
+info(f"Con {es(conf, 2)} el detector marca <b>{int(vistas.sum())}</b> personas. Compáralo con lo que ves en la imagen: "
      "cada persona sin caja es una que se le escapa (falso negativo); suelen ser las pequeñas, las del fondo o las que "
      "van en grupo. Si hay muchas, los recuentos de 2.5 y 2.6 se quedarán cortos. "
-     f"Con un umbral bajo (0,10) vería {bajo}: recupera personas, pero también puede poner cajas donde no hay nadie "
-     f"(falsos positivos). Con uno alto (0,70) vería {alto_}: casi no pone cajas falsas, pero pierde muchas más "
+     f"Con un umbral bajo (0,10) marcaría {bajo}: recupera personas, pero también puede poner cajas donde no hay nadie "
+     f"(falsos positivos). Con uno alto (0,70) marcaría {alto_}: casi no pone cajas falsas, pero pierde muchas más "
      "personas reales.")
 if conf < 0.25:
     aviso("Por debajo de 0,25, el seguimiento de 2.5 y 2.6 no empieza a seguir a nadie a partir de una caja tan dudosa "
@@ -610,7 +610,7 @@ else:
 md(r'''
 ## 2.4 Zonas y línea de puerta (se escriben, no se dibujan con el ratón)
 
-Las zonas se escriben como puntos `x,y` en **porcentaje** de la imagen: `0,0` es la esquina de arriba a la izquierda y `100,100` la de abajo a la derecha. Aquí la coma no es decimal: separa x de y (`0,50` es x = 0 %, y = 50 %). Si necesitas decimales, usa punto: `12.5,30`. Separa los puntos con `;` y escríbelos en orden, recorriendo el borde. Una zona necesita al menos 3 puntos; la línea de puerta, exactamente 2. Puedes renombrar las zonas (por ejemplo, «Barra» y «Mesas»). En la demo 2, la mitad izquierda es el lado del tren y la derecha el andén; puedes renombrarlas «Junto al tren» y «Andén».
+Las zonas se escriben como puntos `x,y` en **porcentaje** de la imagen: `0,0` es la esquina de arriba a la izquierda y `100,100` la de abajo a la derecha. Aquí la coma no es decimal: separa x de y (`0,50` es x = 0 %, y = 50 %). Si necesitas decimales, usa punto: `12.5,30`. Separa los puntos con `;` y escríbelos en orden, recorriendo el borde. Una zona necesita al menos 3 puntos; la línea de puerta, exactamente 2. Puedes renombrar las zonas (por ejemplo, «Barra» y «Mesas»). En la demo 1, la puerta es imaginaria: una línea a media altura. En la demo 2, la mitad izquierda es el lado del tren y la derecha el andén; puedes renombrarlas «Junto al tren» y «Andén».
 ''')
 
 paso("2.4 Zonas y línea de puerta", r'''
@@ -741,7 +741,7 @@ ok("Zonas listas. Sigue con la celda 2.5.")
 md(r'''
 ## 2.5 Aforo por zonas
 
-Mide la ocupación: cuántas personas hay en cada zona en cada momento. El aforo permitido es el límite que no se debe superar (lo usamos en 2.8).
+Mide la ocupación: cuántas personas hay en cada zona en cada momento. El aforo permitido es el límite que no se debe superar (lo verás en el ejemplo de alerta al final de 2.8).
 
 El vídeo se procesa fotograma a fotograma: el detector encuentra a las personas, el **seguimiento** (*tracking*) les asigna un número de identificación (**ID**) y se cuenta cuántas hay dentro de cada zona. Una persona está en una zona si el centro de su caja cae dentro. El número de ID es una etiqueta, no un recuento de personas: cada persona nueva recibe el siguiente número, y si el seguimiento pierde a alguien un rato, al volver a verlo puede darle otro. Por eso los números crecen más deprisa que la gente.
 ''')
@@ -808,6 +808,8 @@ ESTADO["aforo"] = {"zonas": zn["nombres"], "serie": serie, "resumen": resumen, "
                    # (zona, ID) dentro de su zona en el primer o el último fotograma: estancia recortada
                    "en_bordes": dentro_por_fotograma[0] | dentro_por_fotograma[-1],
                    "fotogramas": n, "segundos": round(seg_total, 1), "confianza": ESTADO["confianza"]}
+ok("Ocupación medida. Los números de las cajas sirven para seguir a cada persona; no los uses para contar: crecen más "
+   "deprisa que la gente. Sigue con la celda 2.6.")
 ''')
 
 # ---------------------------------------------------------------------------------------------
@@ -1043,13 +1045,14 @@ md(r'''
 - **Perspectiva**: la zona se marca sobre la imagen plana, no sobre el suelo real, y una persona cuenta donde cae el centro de su caja (más o menos a la altura de la cintura), no donde pisa. Con la cámara inclinada, alguien puede contar en una zona que no está pisando.
 - **Contar no es identificar**: el sistema no sabe quién es nadie, pero el vídeo sí contiene datos personales.
 
-**POC ≠ producción.** Esto es un prototipo: llevarlo a un local real exige medir el error con vídeo propio, decidir dónde se procesa y qué se guarda, y cumplir la normativa de protección de datos.
+**POC ≠ producción.** Esto es un prototipo. Llevarlo a un local real exige medir el error (contar a mano en varios puntos y a varias horas y comparar con el sistema), probar con las cámaras reales, revisar la licencia (AGPL o Enterprise de pago) y cumplir la protección de datos.
 
 **Otros sectores** (ideas para el debate, no casos medidos)
 - **Retail**: ocupación de la zona de cajas para abrir otra cuando se forma cola.
 - **Transporte**: ocupación de andenes para ajustar frecuencias o avisar de aglomeraciones.
 - **Eventos**: aforo por zonas y flujo de personas en los accesos.
 - **Industria**: aviso cuando alguien entra en la zona de trabajo de una máquina, como apoyo y nunca en lugar de los sistemas de seguridad certificados.
+- **Turismo de nieve**: personas en la cola de cada remonte para recomendar otro con menos espera; la espera necesita minutos de vídeo (ver 2.7).
 
 **Preguntas sobre privacidad**
 1. Si el sistema solo guarda números, ¿hace falta avisar a los clientes de que hay una cámara? ¿Por qué?
