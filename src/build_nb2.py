@@ -86,10 +86,10 @@ md(r'''
 md(r'''
 ## 2.1 Preparación
 
-Instala lo que falte, descarga el detector (5 MB) y muestra qué ordenador te ha tocado. La primera vez tarda 1-2 minutos.
+Instala lo que falte, descarga el detector (5 MB) y muestra qué ordenador te ha tocado. La primera vez tarda algo más, porque instala y descarga.
 ''')
 
-codigo("2.1 Preparación (la primera vez tarda 1-2 minutos)", r'''
+codigo("2.1 Preparación", r'''
 import base64, contextlib, html, importlib, importlib.util, io, itertools, json, logging, os, platform
 import http.client, random, shutil, subprocess, sys, tempfile, time, unicodedata, urllib.error, urllib.request
 import warnings
@@ -294,7 +294,7 @@ with celda():
     if shutil.which("ffmpeg") is None and importlib.util.find_spec("imageio_ffmpeg") is None:
         faltan.append("imageio-ffmpeg")
     if faltan:
-        info("Instalando el detector y sus herramientas. La primera vez tarda 1-2 minutos.")
+        info("Instalando el detector y sus herramientas. Solo pasa la primera vez y tarda algo más.")
         fijos = []  # lo que ya trae el entorno no se toca: así no hay que reiniciar la sesión
         for p in ("numpy", "torch", "torchvision", "opencv-python", "opencv-python-headless", "pandas",
                   "matplotlib", "tensorflow", "keras"):
