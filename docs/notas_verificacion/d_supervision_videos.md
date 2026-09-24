@@ -108,6 +108,12 @@ Condiciones de la prueba:
 - `saltar_fotogramas=2`.
 - Fotogramas reducidos con `INTER_AREA` a 1280 px de lado mayor: 1280×720 en people-walking y 720×1280 en subway.
 
+> ⚠️ **Corrección del coordinador (24-sep-2026):** la columna «Entradas / salidas» de esta tabla no vale. La prueba
+> reutilizó los mismos fotogramas para `RegionCounter` y luego para `ObjectCounter`, y las *solutions* pintan sobre el
+> fotograma que reciben, así que el contador de línea vio fotogramas ya anotados. Repetido con `frame.copy()` y ByteTrack
+> (`verificacion/coord/lineas.py`): people-walking `0,50; 100,50` → 8/8, `0,65; 100,65` → 10/6; subway desde 22 s, 10 s:
+> `62,15; 22,100` → 9/3, `30,60; 100,60` → 0/0. La recomendación de la diagonal en el andén se mantiene; la de evitar el 50 % en la demo 1, no.
+
 | Vídeo / tramo | Zonas | Resultado zonas (inicio / mitad / final, máx.) | Puerta | Entradas / salidas |
 |---|---|---|---|---|
 | people-walking 0-10 s | izq. `0,0; 50,0; 50,100; 0,100` · der. `50,0; 100,0; 100,100; 50,100` | 10/7 · 12/10 · 9/11 · máx. 14/13 | **`0,65; 100,65`** (horizontal) | 4 / 6 |
