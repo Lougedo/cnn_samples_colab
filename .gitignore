@@ -1,5 +1,6 @@
 # Entornos
 .venv/
+.venv-colab/
 venv/
 __pycache__/
 *.pyc
@@ -30,3 +31,4 @@ verificacion/
 # Sistema
 .DS_Store
 ~$*
+pesos/
